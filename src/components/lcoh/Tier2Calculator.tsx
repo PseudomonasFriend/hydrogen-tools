@@ -1,0 +1,282 @@
+'use client'
+
+import { useState } from 'react'
+import type { PathwayId, ElectrolyzerParams, SmrParams, Tier2ExtraParams, Tier2Result, SensitivityPoint } from '@/lib/lcoh/types'
+import type { Translations } from '@/lib/i18n/ko'
+import { DEFAULT_PARAMS, DEFAULT_T2_EXTRA } from '@/lib/lcoh/pathways'
+import { calcElectrolyzerLCOH_T2, calcSmrLCOH_T2, calcSensitivity } from '@/lib/lcoh/calculations'
+import PathwaySelector from './PathwaySelector'
+import ResultChart from './ResultChart'
+import TornadoChart from './TornadoChart'
+
+const SMR_PATHWAYS: PathwayId[] = ['smr', 'smr_ccs', 'atr_ccs', 'coal']
+
+function isSmrPathway(id: PathwayId): boolean {
+  return SMR_PATHWAYS.includes(id)
+}
+
+interface Props {
+  t: Translations
+}
+
+export default function Tier2Calculator({ t }: Props) {
+  const [pathway, setPathway] = useState<PathwayId>('pem')
+  const [params, setParams] = useState<ElectrolyzerParams | SmrParams>(DEFAULT_PARAMS['pem'] as ElectrolyzerParams)
+  const [t2Params, setT2Params] = useState<Tier2ExtraParams>(DEFAULT_T2_EXTRA['pem'])
+  const [result, setResult] = useState<Tier2Result | null>(null)
+  const [sensitivities, setSensitivities] = useState<SensitivityPoint[]>([])
+
+  const handlePathwayChange = (id: PathwayId) => {
+    setPathway(id)
+    setParams(DEFAULT_PARAMS[id])
+    setT2Params(DEFAULT_T2_EXTRA[id])
+    setResult(null)
+    setSensitivities([])
+  }
+
+  const handleReset = () => {
+    setParams(DEFAULT_PARAMS[pathway])
+    setT2Params(DEFAULT_T2_EXTRA[pathway])
+    setResult(null)
+    setSensitivities([])
+  }
+
+  const handleCalculate = () => {
+    const smr = isSmrPathway(pathway)
+    const res = smr
+      ? calcSmrLCOH_T2(params as SmrParams, t2Params)
+      : calcElectrolyzerLCOH_T2(params as ElectrolyzerParams, t2Params)
+    setResult(res)
+    setSensitivities(calcSensitivity(params, t2Params, smr))
+  }
+
+  const setField = (key: string, value: number) => {
+    setParams((prev) => ({ ...prev, [key]: value }))
+  }
+
+  const setT2Field = (key: string, value: number) => {
+    if (key === 'stackReplCostRate' || key === 'stackReplInterval') {
+      setT2Params((prev) => ({
+        ...prev,
+        stackReplacement: {
+          costRate: key === 'stackReplCostRate' ? value : (prev.stackReplacement?.costRate ?? 0.25),
+          interval: key === 'stackReplInterval' ? value : (prev.stackReplacement?.interval ?? 8),
+        },
+      }))
+    } else {
+      setT2Params((prev) => ({ ...prev, [key]: value }))
+    }
+  }
+
+  const isSmr = isSmrPathway(pathway)
+
+  // Tier1Result 호환 객체 (ResultChart 재사용)
+  const tier1Compatible = result
+    ? {
+        lcoh: result.lcoh,
+        annualProduction: result.annualProduction,
+        capexComponent: result.capexComponent,
+        opexComponent: result.opexComponent,
+        fuelComponent: result.fuelComponent,
+      }
+    : null
+
+  return (
+    <div className="space-y-6">
+      {/* 경로 선택 */}
+      <PathwaySelector selected={pathway} onChange={handlePathwayChange} t={t} />
+
+      {/* 파라미터 입력 */}
+      <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-medium text-gray-600">{t.lcoh.params}</h2>
+          <button onClick={handleReset} className="text-xs text-blue-600 hover:text-blue-800 underline">
+            {t.lcoh.resetDefaults}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Tier 1 파라미터 (좌) */}
+          <div>
+            <p className="text-xs text-gray-400 mb-3 uppercase tracking-wide">Tier 1 파라미터</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {isSmr ? (
+                <>
+                  <NumInput label={t.lcoh.plantCapacity} value={(params as SmrParams).plantCapacity} onChange={(v) => setField('plantCapacity', v)} step={10} />
+                  <NumInput label={t.lcoh.capexPerTpd} value={(params as SmrParams).capexPerTpd} onChange={(v) => setField('capexPerTpd', v)} step={100000} />
+                  <NumInput label={t.lcoh.opexRate} value={(params as SmrParams).opexRate * 100} onChange={(v) => setField('opexRate', v / 100)} step={0.5} min={0} max={20} />
+                  <NumInput label={t.lcoh.capacityFactor} value={(params as SmrParams).capacityFactor * 100} onChange={(v) => setField('capacityFactor', v / 100)} step={1} min={0} max={100} />
+                  <NumInput label={t.lcoh.naturalGasCost} value={(params as SmrParams).naturalGasCostPerKgH2} onChange={(v) => setField('naturalGasCostPerKgH2', v)} step={0.1} />
+                  {(pathway === 'smr_ccs' || pathway === 'atr_ccs') && (
+                    <NumInput label={t.lcoh.ccsCost} value={(params as SmrParams).ccsCostPerKgH2 ?? 0} onChange={(v) => setField('ccsCostPerKgH2', v)} step={0.1} />
+                  )}
+                  {pathway === 'coal' && (
+                    <NumInput label={t.lcoh.coalCost} value={(params as SmrParams).coalCostPerKgH2 ?? 0} onChange={(v) => setField('coalCostPerKgH2', v)} step={0.05} />
+                  )}
+                  <NumInput label={t.lcoh.lifetime} value={(params as SmrParams).lifetime} onChange={(v) => setField('lifetime', v)} step={1} min={5} max={40} />
+                </>
+              ) : (
+                <>
+                  <NumInput label={t.lcoh.systemCapacity} value={(params as ElectrolyzerParams).systemCapacity} onChange={(v) => setField('systemCapacity', v)} step={100} />
+                  <NumInput label={t.lcoh.capex} value={(params as ElectrolyzerParams).capex} onChange={(v) => setField('capex', v)} step={50} />
+                  <NumInput label={t.lcoh.opexRate} value={(params as ElectrolyzerParams).opexRate * 100} onChange={(v) => setField('opexRate', v / 100)} step={0.5} min={0} max={20} />
+                  <NumInput label={t.lcoh.capacityFactor} value={(params as ElectrolyzerParams).capacityFactor * 100} onChange={(v) => setField('capacityFactor', v / 100)} step={1} min={0} max={100} />
+                  <NumInput label={t.lcoh.energyConsumption} value={(params as ElectrolyzerParams).energyConsumption} onChange={(v) => setField('energyConsumption', v)} step={1} />
+                  <NumInput label={t.lcoh.electricityCost} value={(params as ElectrolyzerParams).electricityCost} onChange={(v) => setField('electricityCost', v)} step={0.01} />
+                  <NumInput label={t.lcoh.lifetime} value={(params as ElectrolyzerParams).lifetime} onChange={(v) => setField('lifetime', v)} step={1} min={5} max={40} />
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Tier 2 추가 파라미터 (우) */}
+          <div>
+            <p className="text-xs text-gray-400 mb-3 uppercase tracking-wide">Tier 2 파라미터</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <NumInput
+                label={t.lcoh2.wacc}
+                value={t2Params.wacc * 100}
+                onChange={(v) => setT2Field('wacc', v / 100)}
+                step={0.5}
+                min={0}
+                max={30}
+              />
+              {!isSmr && t2Params.stackReplacement && (
+                <>
+                  <NumInput
+                    label={t.lcoh2.stackReplCost}
+                    value={t2Params.stackReplacement.costRate * 100}
+                    onChange={(v) => setT2Field('stackReplCostRate', v / 100)}
+                    step={1}
+                    min={0}
+                    max={100}
+                  />
+                  <NumInput
+                    label={t.lcoh2.stackReplInterval}
+                    value={t2Params.stackReplacement.interval}
+                    onChange={(v) => setT2Field('stackReplInterval', v)}
+                    step={1}
+                    min={1}
+                    max={30}
+                  />
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={handleCalculate}
+          className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
+        >
+          {t.lcoh.calculate}
+        </button>
+      </div>
+
+      {/* 결과 */}
+      {result && (
+        <>
+          {/* Tier 1 vs Tier 2 비교 */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <h2 className="text-sm font-medium text-gray-600 mb-4">{t.lcoh.result}</h2>
+
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="text-center py-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="text-xs text-gray-500 mb-1">{t.lcoh2.tier1Compare}</div>
+                <div className="text-3xl font-bold text-gray-600">${result.tier1Lcoh.toFixed(2)}</div>
+                <div className="text-xs text-gray-400 mt-1">{t.lcoh.unit}</div>
+              </div>
+              <div className="text-center py-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-xs text-blue-600 mb-1">{t.lcoh2.tier2Compare}</div>
+                <div className="text-4xl font-bold text-blue-700">${result.lcoh.toFixed(2)}</div>
+                <div className="text-xs text-blue-400 mt-1">{t.lcoh.unit}</div>
+              </div>
+            </div>
+
+            {/* 연간 생산량 */}
+            <div className="text-center text-sm text-gray-600 mb-4">
+              <span className="font-medium">{t.lcoh.annualProductionLabel}: </span>
+              {result.annualProduction.toLocaleString('en-US', { maximumFractionDigits: 0 })} {t.lcoh.annualProductionUnit}
+            </div>
+
+            {/* 비용 구성 배지 */}
+            <div className={`grid gap-2 mb-4 ${!isSmr && result.stackReplComponent > 0 ? 'grid-cols-4' : 'grid-cols-3'}`}>
+              <CostBadge label={t.lcoh.capexLabel} value={result.capexComponent} color="blue" />
+              <CostBadge label={t.lcoh.opexLabel} value={result.opexComponent} color="amber" />
+              <CostBadge label={t.lcoh.fuelLabel} value={result.fuelComponent} color="red" />
+              {!isSmr && result.stackReplComponent > 0 && (
+                <CostBadge label={t.lcoh2.stackReplLabel} value={result.stackReplComponent} color="purple" />
+              )}
+            </div>
+
+            {/* 차트 */}
+            {tier1Compatible && <ResultChart result={tier1Compatible} t={t} />}
+          </div>
+
+          {/* 민감도 분석 */}
+          {sensitivities.length > 0 && (
+            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+              <h2 className="text-sm font-medium text-gray-600 mb-1">{t.lcoh2.sensitivity}</h2>
+              <p className="text-xs text-gray-400 mb-4">{t.lcoh2.sensitivityDesc}</p>
+              <TornadoChart sensitivities={sensitivities} t={t} />
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+function NumInput({
+  label,
+  value,
+  onChange,
+  step = 1,
+  min,
+  max,
+}: {
+  label: string
+  value: number
+  onChange: (v: number) => void
+  step?: number
+  min?: number
+  max?: number
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+      <input
+        type="number"
+        value={value}
+        step={step}
+        min={min}
+        max={max}
+        onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+        className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+  )
+}
+
+function CostBadge({
+  label,
+  value,
+  color,
+}: {
+  label: string
+  value: number
+  color: 'blue' | 'amber' | 'red' | 'purple'
+}) {
+  const colorMap = {
+    blue:   'bg-blue-50 text-blue-700 border-blue-200',
+    amber:  'bg-amber-50 text-amber-700 border-amber-200',
+    red:    'bg-red-50 text-red-700 border-red-200',
+    purple: 'bg-purple-50 text-purple-700 border-purple-200',
+  }
+  return (
+    <div className={`border rounded-lg p-2 text-center ${colorMap[color]}`}>
+      <div className="text-xs truncate mb-1">{label}</div>
+      <div className="text-sm font-semibold">${value.toFixed(3)}</div>
+    </div>
+  )
+}

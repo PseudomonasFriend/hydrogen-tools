@@ -1,0 +1,62 @@
+import type { Metadata } from 'next'
+import type { Lang } from '@/lib/lcoh/types'
+import Link from 'next/link'
+import { ko } from '@/lib/i18n/ko'
+import { en } from '@/lib/i18n/en'
+
+const translations = { ko, en }
+
+export async function generateStaticParams() {
+  return [{ lang: 'ko' }, { lang: 'en' }]
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>
+}): Promise<Metadata> {
+  const { lang } = await params
+  const t = translations[(lang as Lang) ?? 'ko'] ?? ko
+  return {
+    title: t.site.title,
+    description: t.site.description,
+  }
+}
+
+export default async function LangLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: Promise<{ lang: string }>
+}) {
+  const { lang } = await params
+  const t = translations[(lang as Lang)] ?? ko
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* 상단 내비게이션 */}
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+          <div className="flex items-center gap-6">
+            <Link href={`/${lang}`} className="text-base font-bold text-blue-700">
+              H₂ Tools
+            </Link>
+            <Link href={`/${lang}/lcoh`} className="text-sm text-gray-600 hover:text-gray-900">
+              {t.nav.lcoh}
+            </Link>
+          </div>
+          <Link
+            href={t.lang.switchHref}
+            className="text-xs border border-gray-300 rounded-md px-2.5 py-1 text-gray-600 hover:bg-gray-100"
+          >
+            {t.lang.switch}
+          </Link>
+        </div>
+      </nav>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        {children}
+      </main>
+    </div>
+  )
+}
