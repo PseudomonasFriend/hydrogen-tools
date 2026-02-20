@@ -33,10 +33,10 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
           <div className="text-blue-600 text-lg font-bold mb-2">{t.home.tier2Title}</div>
           <p className="text-sm text-gray-600">{t.home.tier2Desc}</p>
         </Link>
-        <div className="bg-white rounded-xl border border-gray-200 p-5 opacity-60 cursor-not-allowed">
-          <div className="text-gray-500 text-lg font-bold mb-2">{t.home.tier3Title}</div>
-          <p className="text-sm text-gray-500">{t.home.tier3Desc}</p>
-        </div>
+        <Link href={`/${lang}/lcoh/tier3`} className="block bg-white rounded-xl border border-blue-200 p-5 hover:shadow-md transition-shadow">
+          <div className="text-blue-600 text-lg font-bold mb-2">{t.home.tier3Title}</div>
+          <p className="text-sm text-gray-600">{t.home.tier3Desc}</p>
+        </Link>
       </div>
     </div>
   )
