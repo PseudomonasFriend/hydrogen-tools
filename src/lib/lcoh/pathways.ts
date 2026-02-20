@@ -1,0 +1,114 @@
+import type { PathwayId, PathwayParams, Tier2ExtraParams, Tier3ExtraParams } from './types'
+
+// IEA Global Hydrogen Review 2024 / IRENA 2024~2025 기반 기본값
+export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
+  pem: {
+    systemCapacity: 1000,
+    capex: 1400,               // IEA 2024: $1,400~1,700/kW
+    opexRate: 0.04,
+    capacityFactor: 0.45,
+    energyConsumption: 55,
+    electricityCost: 0.05,
+    lifetime: 20,
+  },
+  alk: {
+    systemCapacity: 1000,
+    capex: 800,                // IEA 2024: $800~1,000/kW (성숙 기술)
+    opexRate: 0.03,
+    capacityFactor: 0.50,
+    energyConsumption: 50,     // 효율 개선 반영
+    electricityCost: 0.05,
+    lifetime: 25,
+  },
+  aem: {
+    systemCapacity: 1000,
+    capex: 1200,               // 초기 상용화 단계
+    opexRate: 0.04,
+    capacityFactor: 0.45,
+    energyConsumption: 53,     // 소폭 개선
+    electricityCost: 0.05,
+    lifetime: 15,
+  },
+  soec: {
+    systemCapacity: 1000,
+    capex: 2800,               // IEA 2024: 여전히 고가
+    opexRate: 0.05,
+    capacityFactor: 0.85,
+    energyConsumption: 37,     // IEA 84% LHV 효율 반영
+    electricityCost: 0.04,
+    lifetime: 10,
+  },
+  smr: {
+    plantCapacity: 100,
+    capexPerTpd: 5_500_000,    // 규제 강화 반영
+    opexRate: 0.04,
+    capacityFactor: 0.90,
+    naturalGasCostPerKgH2: 1.2, // 2024 가스가격 하향
+    lifetime: 25,
+  },
+  smr_ccs: {
+    plantCapacity: 100,
+    capexPerTpd: 9_000_000,    // CCS 설비비 상승
+    opexRate: 0.045,
+    capacityFactor: 0.90,
+    naturalGasCostPerKgH2: 1.2,
+    ccsCostPerKgH2: 0.6,      // 포집 비용 상승
+    lifetime: 25,
+  },
+  atr_ccs: {
+    plantCapacity: 100,
+    capexPerTpd: 8_000_000,    // ATR+CCS 설비비
+    opexRate: 0.04,
+    capacityFactor: 0.90,
+    naturalGasCostPerKgH2: 1.2,
+    ccsCostPerKgH2: 0.5,      // 포집 비용 상승
+    lifetime: 25,
+  },
+  coal: {
+    plantCapacity: 200,
+    capexPerTpd: 7_000_000,    // 가스화 설비 상승
+    opexRate: 0.05,
+    capacityFactor: 0.85,
+    naturalGasCostPerKgH2: 0,
+    coalCostPerKgH2: 0.6,     // 2024 석탄 가격 반영
+    lifetime: 30,
+  },
+}
+
+export type PathwayColor = 'green' | 'blue' | 'gray' | 'yellow'
+
+export const PATHWAY_COLORS: Record<PathwayId, PathwayColor> = {
+  pem: 'green',
+  alk: 'green',
+  aem: 'green',
+  soec: 'green',
+  smr: 'gray',
+  smr_ccs: 'blue',
+  atr_ccs: 'blue',
+  coal: 'yellow',
+}
+
+export const PATHWAY_ORDER: PathwayId[] = ['pem', 'alk', 'aem', 'soec', 'smr', 'smr_ccs', 'atr_ccs', 'coal']
+
+export const DEFAULT_T2_EXTRA: Record<PathwayId, Tier2ExtraParams> = {
+  pem:     { wacc: 0.08, stackReplacement: { costRate: 0.25, interval: 8 } },
+  alk:     { wacc: 0.08, stackReplacement: { costRate: 0.15, interval: 12 } },
+  aem:     { wacc: 0.08, stackReplacement: { costRate: 0.25, interval: 7 } },
+  soec:    { wacc: 0.08, stackReplacement: { costRate: 0.35, interval: 6 } },
+  smr:     { wacc: 0.08 },
+  smr_ccs: { wacc: 0.08 },
+  atr_ccs: { wacc: 0.08 },
+  coal:    { wacc: 0.08 },
+}
+
+// Tier 3 추가 파라미터 기본값
+export const DEFAULT_T3_EXTRA: Record<PathwayId, Tier3ExtraParams> = {
+  pem:     { h2SellingPrice: 5.0, taxRate: 0.25, depreciationYears: 10, constructionYears: 2 },
+  alk:     { h2SellingPrice: 4.5, taxRate: 0.25, depreciationYears: 12, constructionYears: 2 },
+  aem:     { h2SellingPrice: 5.0, taxRate: 0.25, depreciationYears: 8,  constructionYears: 2 },
+  soec:    { h2SellingPrice: 5.5, taxRate: 0.25, depreciationYears: 7,  constructionYears: 2 },
+  smr:     { h2SellingPrice: 3.0, taxRate: 0.25, depreciationYears: 15, constructionYears: 3 },
+  smr_ccs: { h2SellingPrice: 3.5, taxRate: 0.25, depreciationYears: 15, constructionYears: 3 },
+  atr_ccs: { h2SellingPrice: 3.5, taxRate: 0.25, depreciationYears: 15, constructionYears: 3 },
+  coal:    { h2SellingPrice: 3.0, taxRate: 0.25, depreciationYears: 15, constructionYears: 3 },
+}
