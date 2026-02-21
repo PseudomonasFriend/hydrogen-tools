@@ -1,8 +1,8 @@
-import type { Metadata } from 'next'
-import type { Lang } from '@/lib/lcoh/types'
-import Link from 'next/link'
-import { ko } from '@/lib/i18n/ko'
-import { en } from '@/lib/i18n/en'
+import type { Metadata } from'next'
+import type { Lang } from'@/lib/lcoh/types'
+import Link from'next/link'
+import { ko } from'@/lib/i18n/ko'
+import { en } from'@/lib/i18n/en'
 
 const translations = { ko, en }
 
@@ -44,6 +44,12 @@ export default async function LangLayout({
             </Link>
             <Link href={`/${lang}/lcoh`} className="text-sm text-gray-600 hover:text-gray-900">
               {t.nav.lcoh}
+            </Link>
+            <Link href={`/${lang}/about`} className="text-sm text-gray-600 hover:text-gray-900">
+              {t.nav.about}
+            </Link>
+            <Link href={`/${lang}/privacy`} className="text-sm text-gray-500 hover:text-gray-900">
+              {t.nav.privacy}
             </Link>
           </div>
           <Link
