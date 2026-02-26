@@ -120,6 +120,7 @@ export const en: Translations = {
     breakEvenPositive: '▲ Profitable',
     breakEvenNegative: '▼ Below break-even',
     constructionNote: 'Construction period reflected in cash flows',
+    subsidyPerKgH2: 'Subsidy / Tax Credit ($/kg H₂)',
   },
   about: {
     title: 'About Hydrogen Intelligence Platform',

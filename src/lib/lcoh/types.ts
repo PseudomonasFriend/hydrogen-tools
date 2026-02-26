@@ -74,6 +74,7 @@ export interface Tier3ExtraParams {
   taxRate: number            // fraction (0.25 = 25%)
   depreciationYears: number  // 감가상각 기간 (년)
   constructionYears: number  // 건설 기간 (년)
+  subsidyPerKgH2: number     // $/kg H₂ (보조금/세액공제, 기본값 0)
 }
 
 export type ScenarioId = 'optimistic' | 'base' | 'conservative'

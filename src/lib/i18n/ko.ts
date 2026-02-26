@@ -118,6 +118,7 @@ export const ko = {
  breakEvenPositive: '▲ 여유 있음',
  breakEvenNegative: '▼ 판매가 부족',
  constructionNote: '건설기간이 현금흐름에 반영됨',
+ subsidyPerKgH2: '보조금/세액공제 ($/kg H₂)',
  },
   about: {
  title: '수소 인텔리전스 플랫폼 소개',

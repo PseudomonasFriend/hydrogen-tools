@@ -255,7 +255,9 @@ function buildElectrolyzerCashFlows(
   const H2_annual = (p.systemCapacity * p.capacityFactor * 8760) / p.energyConsumption
   const opexAnnual = capexTotal * p.opexRate * scenario.opexMultiplier
   const fuelAnnual = H2_annual * p.electricityCost * p.energyConsumption * scenario.fuelMultiplier
-  const revenue = H2_annual * t3.h2SellingPrice * scenario.priceMultiplier
+  // 보조금/세액공제(subsidyPerKgH2)는 revenue에 반영 → NPV/IRR 계산도 정확해짐
+  const subsidy = t3.subsidyPerKgH2 ?? 0
+  const revenue = H2_annual * (t3.h2SellingPrice * scenario.priceMultiplier + subsidy)
   const annualDepreciation = capexTotal / t3.depreciationYears
   const wacc = t2.wacc
   const constructionYears = t3.constructionYears ?? 0
@@ -327,7 +329,9 @@ function buildSmrCashFlows(
   const opexAnnual = capexTotal * p.opexRate * scenario.opexMultiplier
   const fuelCostPerKg = ((p.naturalGasCostPerKgH2 ?? 0) + (p.ccsCostPerKgH2 ?? 0) + (p.coalCostPerKgH2 ?? 0)) * scenario.fuelMultiplier
   const fuelAnnual = H2_annual * fuelCostPerKg
-  const revenue = H2_annual * t3.h2SellingPrice * scenario.priceMultiplier
+  // 보조금/세액공제(subsidyPerKgH2)는 revenue에 반영 → NPV/IRR 계산도 정확해짐
+  const subsidy = t3.subsidyPerKgH2 ?? 0
+  const revenue = H2_annual * (t3.h2SellingPrice * scenario.priceMultiplier + subsidy)
   const annualDepreciation = capexTotal / t3.depreciationYears
   const wacc = t2.wacc
   const constructionYears = t3.constructionYears ?? 0

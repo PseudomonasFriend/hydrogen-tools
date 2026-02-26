@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
-import type { PathwayId, ElectrolyzerParams, SmrParams, Tier2ExtraParams, Tier3ExtraParams, Tier3Result } from '@/lib/lcoh/types'
+import { useState, useEffect } from 'react'
+import type { PathwayId, ElectrolyzerParams, SmrParams, Tier2ExtraParams, Tier3ExtraParams, Tier3Result, BreakEvenResult, Lang } from '@/lib/lcoh/types'
 import type { Translations } from '@/lib/i18n/ko'
 import { DEFAULT_PARAMS, DEFAULT_T2_EXTRA, DEFAULT_T3_EXTRA } from '@/lib/lcoh/pathways'
-import { calcTier3 } from '@/lib/lcoh/calculations'
+import { calcTier3, calcBreakEven } from '@/lib/lcoh/calculations'
+import { useLcohStorage } from '@/hooks/useLcohStorage'
 import PathwaySelector from './PathwaySelector'
 import CashFlowTable from './CashFlowTable'
 import NpvChart from './NpvChart'
@@ -17,6 +18,7 @@ function isSmrPathway(id: PathwayId): boolean {
 
 interface Props {
   t: Translations
+  lang: Lang
 }
 
 export default function Tier3Calculator({ t }: Props) {
@@ -25,13 +27,29 @@ export default function Tier3Calculator({ t }: Props) {
   const [t2Params, setT2Params] = useState<Tier2ExtraParams>(DEFAULT_T2_EXTRA['pem'])
   const [t3Params, setT3Params] = useState<Tier3ExtraParams>(DEFAULT_T3_EXTRA['pem'])
   const [result, setResult] = useState<Tier3Result | null>(null)
+  const [breakEvenResult, setBreakEvenResult] = useState<BreakEvenResult | null>(null)
+
+  const storage = useLcohStorage()
+
+  // 초기 로드 (경로 + 파라미터 + t2Params + t3Params)
+  useEffect(() => {
+    const savedPathway = storage.loadPathway()
+    if (savedPathway) {
+      setPathway(savedPathway)
+      setParams(storage.loadParams(savedPathway, DEFAULT_PARAMS[savedPathway]))
+      setT2Params(storage.loadT2(savedPathway, DEFAULT_T2_EXTRA[savedPathway]))
+      setT3Params(storage.loadT3(savedPathway, DEFAULT_T3_EXTRA[savedPathway]))
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePathwayChange = (id: PathwayId) => {
+    storage.savePathway(id)
     setPathway(id)
-    setParams(DEFAULT_PARAMS[id])
-    setT2Params(DEFAULT_T2_EXTRA[id])
-    setT3Params(DEFAULT_T3_EXTRA[id])
+    setParams(storage.loadParams(id, DEFAULT_PARAMS[id]))
+    setT2Params(storage.loadT2(id, DEFAULT_T2_EXTRA[id]))
+    setT3Params(storage.loadT3(id, DEFAULT_T3_EXTRA[id]))
     setResult(null)
+    setBreakEvenResult(null)
   }
 
   const handleReset = () => {
@@ -39,11 +57,19 @@ export default function Tier3Calculator({ t }: Props) {
     setT2Params(DEFAULT_T2_EXTRA[pathway])
     setT3Params(DEFAULT_T3_EXTRA[pathway])
     setResult(null)
+    setBreakEvenResult(null)
   }
 
   const handleCalculate = () => {
     const smr = isSmrPathway(pathway)
-    setResult(calcTier3(params, t2Params, t3Params, smr))
+    const res = calcTier3(params, t2Params, t3Params, smr)
+    // 계산 성공 전 저장
+    storage.saveParams(pathway, params)
+    storage.saveT2(pathway, t2Params)
+    storage.saveT3(pathway, t3Params)
+    setResult(res)
+    const be = calcBreakEven(params, t2Params, t3Params)
+    setBreakEvenResult(be)
   }
 
   const setField = (key: string, value: number) => {
@@ -143,9 +169,17 @@ export default function Tier3Calculator({ t }: Props) {
             <p className="text-xs text-gray-400 mb-3 uppercase tracking-wide">Tier 3 파라미터</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <NumInput label={t.lcoh3.h2SellingPrice} value={t3Params.h2SellingPrice} onChange={(v) => setT3Field('h2SellingPrice', v)} step={0.5} min={0} />
+              <NumInput label={t.lcoh3.subsidyPerKgH2} value={t3Params.subsidyPerKgH2} onChange={(v) => setT3Field('subsidyPerKgH2', v)} step={0.1} min={0} max={10} />
               <NumInput label={t.lcoh3.taxRate} value={t3Params.taxRate * 100} onChange={(v) => setT3Field('taxRate', v / 100)} step={1} min={0} max={50} />
               <NumInput label={t.lcoh3.depreciationYears} value={t3Params.depreciationYears} onChange={(v) => setT3Field('depreciationYears', v)} step={1} min={1} max={30} />
-              <NumInput label={t.lcoh3.constructionYears} value={t3Params.constructionYears} onChange={(v) => setT3Field('constructionYears', v)} step={1} min={1} max={5} />
+              <div>
+                <NumInput label={t.lcoh3.constructionYears} value={t3Params.constructionYears} onChange={(v) => setT3Field('constructionYears', v)} step={1} min={1} max={5} />
+                {t3Params.constructionYears > 0 && (
+                  <p className="text-xs text-blue-600 mt-1">
+                    {t.lcoh3.constructionNote}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -164,7 +198,7 @@ export default function Tier3Calculator({ t }: Props) {
           {/* 투자 요약 */}
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <h2 className="text-sm font-medium text-gray-600 mb-4">{t.lcoh3.summary}</h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
               <SummaryCard
                 label={t.lcoh3.npv}
                 value={`$${(result.npv / 1_000_000).toFixed(2)}M`}
@@ -185,6 +219,15 @@ export default function Tier3Calculator({ t }: Props) {
                 value={`$${result.lcoh.toFixed(2)}/kg`}
                 positive={result.lcoh < t3Params.h2SellingPrice}
               />
+              {breakEvenResult && (
+                <SummaryCard
+                  label={t.lcoh3.breakEvenPrice}
+                  value={`$${breakEvenResult.breakEvenPrice.toFixed(2)}/kg`}
+                  positive={breakEvenResult.margin >= 0}
+                  subLabel={breakEvenResult.margin >= 0 ? t.lcoh3.breakEvenPositive : t.lcoh3.breakEvenNegative}
+                  subValue={`${breakEvenResult.margin >= 0 ? '+' : ''}$${breakEvenResult.margin.toFixed(2)}`}
+                />
+              )}
             </div>
           </div>
 
@@ -261,11 +304,29 @@ function NumInput({
   )
 }
 
-function SummaryCard({ label, value, positive }: { label: string; value: string; positive: boolean }) {
+function SummaryCard({
+  label,
+  value,
+  positive,
+  subLabel,
+  subValue,
+}: {
+  label: string
+  value: string
+  positive: boolean
+  subLabel?: string
+  subValue?: string
+}) {
   return (
     <div className={`border rounded-lg p-3 text-center ${positive ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
       <div className="text-xs text-gray-500 mb-1">{label}</div>
       <div className={`text-xl font-bold ${positive ? 'text-green-700' : 'text-red-600'}`}>{value}</div>
+      {subLabel && (
+        <div className={`text-xs mt-1 ${positive ? 'text-green-600' : 'text-red-500'}`}>{subLabel}</div>
+      )}
+      {subValue && (
+        <div className={`text-xs font-medium ${positive ? 'text-green-700' : 'text-red-600'}`}>{subValue}</div>
+      )}
     </div>
   )
 }

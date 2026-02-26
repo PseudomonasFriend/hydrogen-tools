@@ -15,7 +15,7 @@ export default async function Tier3Page({ params }: { params: Promise<{ lang: st
         <h1 className="text-2xl font-bold text-gray-900">{t.lcoh3.title}</h1>
         <p className="text-sm text-gray-500 mt-1">{t.lcoh3.subtitle}</p>
       </div>
-      <Tier3Calculator t={t} />
+      <Tier3Calculator t={t} lang={lang as Lang} />
     </div>
   )
 }

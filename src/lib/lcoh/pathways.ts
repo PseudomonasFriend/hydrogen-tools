@@ -7,7 +7,7 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
     capex: 1400,               // IEA 2024: $1,400~1,700/kW
     opexRate: 0.04,
     capacityFactor: 0.45,
-    energyConsumption: 55,
+    energyConsumption: 52,     // IEA 2024: 52~55 kWh/kg H₂
     electricityCost: 0.05,
     lifetime: 20,
   },
@@ -94,7 +94,7 @@ export const DEFAULT_T2_EXTRA: Record<PathwayId, Tier2ExtraParams> = {
   pem:     { wacc: 0.08, stackReplacement: { costRate: 0.25, interval: 8 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
   alk:     { wacc: 0.08, stackReplacement: { costRate: 0.15, interval: 12 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
   aem:     { wacc: 0.08, stackReplacement: { costRate: 0.25, interval: 7 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
-  soec:    { wacc: 0.08, stackReplacement: { costRate: 0.45, interval: 5 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
+  soec:    { wacc: 0.08, stackReplacement: { costRate: 0.30, interval: 7 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
   smr:     { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
   smr_ccs: { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
   atr_ccs: { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
@@ -103,12 +103,12 @@ export const DEFAULT_T2_EXTRA: Record<PathwayId, Tier2ExtraParams> = {
 
 // Tier 3 추가 파라미터 기본값
 export const DEFAULT_T3_EXTRA: Record<PathwayId, Tier3ExtraParams> = {
-  pem:     { h2SellingPrice: 5.0, taxRate: 0.25, depreciationYears: 10, constructionYears: 2 },
-  alk:     { h2SellingPrice: 4.5, taxRate: 0.25, depreciationYears: 12, constructionYears: 2 },
-  aem:     { h2SellingPrice: 5.0, taxRate: 0.25, depreciationYears: 8,  constructionYears: 2 },
-  soec:    { h2SellingPrice: 5.5, taxRate: 0.25, depreciationYears: 7,  constructionYears: 2 },
-  smr:     { h2SellingPrice: 3.0, taxRate: 0.25, depreciationYears: 15, constructionYears: 3 },
-  smr_ccs: { h2SellingPrice: 3.5, taxRate: 0.25, depreciationYears: 15, constructionYears: 3 },
-  atr_ccs: { h2SellingPrice: 3.5, taxRate: 0.25, depreciationYears: 15, constructionYears: 3 },
-  coal:    { h2SellingPrice: 3.0, taxRate: 0.25, depreciationYears: 15, constructionYears: 3 },
+  pem:     { h2SellingPrice: 5.0, taxRate: 0.25, depreciationYears: 10, constructionYears: 2, subsidyPerKgH2: 0 },
+  alk:     { h2SellingPrice: 4.5, taxRate: 0.25, depreciationYears: 12, constructionYears: 2, subsidyPerKgH2: 0 },
+  aem:     { h2SellingPrice: 5.0, taxRate: 0.25, depreciationYears: 8,  constructionYears: 2, subsidyPerKgH2: 0 },
+  soec:    { h2SellingPrice: 5.5, taxRate: 0.25, depreciationYears: 7,  constructionYears: 2, subsidyPerKgH2: 0 },
+  smr:     { h2SellingPrice: 3.0, taxRate: 0.25, depreciationYears: 15, constructionYears: 3, subsidyPerKgH2: 0 },
+  smr_ccs: { h2SellingPrice: 3.5, taxRate: 0.25, depreciationYears: 15, constructionYears: 3, subsidyPerKgH2: 0 },
+  atr_ccs: { h2SellingPrice: 3.5, taxRate: 0.25, depreciationYears: 15, constructionYears: 3, subsidyPerKgH2: 0 },
+  coal:    { h2SellingPrice: 3.0, taxRate: 0.25, depreciationYears: 15, constructionYears: 3, subsidyPerKgH2: 0 },
 }
