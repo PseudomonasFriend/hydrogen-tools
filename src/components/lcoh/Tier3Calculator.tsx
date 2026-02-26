@@ -209,7 +209,7 @@ export default function Tier3Calculator({ t, lang }: Props) {
   return (
     <div className="space-y-4">
       {/* 경로 선택 */}
-      <PathwaySelector selected={pathway} onChange={handlePathwayChange} t={t} />
+      <PathwaySelector selected={pathway} onChange={handlePathwayChange} t={t} lang={lang} />
 
       <div className="flex flex-col lg:flex-row lg:items-start lg:gap-6">
         {/* 좌: 파라미터 패널 */}

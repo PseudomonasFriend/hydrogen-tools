@@ -133,7 +133,7 @@ export default function Tier2Calculator({ t, lang }: Props) {
   return (
     <div className="space-y-6">
       {/* 경로 선택 */}
-      <PathwaySelector selected={pathway} onChange={handlePathwayChange} t={t} />
+      <PathwaySelector selected={pathway} onChange={handlePathwayChange} t={t} lang={lang} />
 
       {/* 파라미터 입력 */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
