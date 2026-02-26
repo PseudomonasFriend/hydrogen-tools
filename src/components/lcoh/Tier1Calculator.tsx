@@ -49,6 +49,11 @@ export default function Tier1Calculator({ t, lang }: Props) {
   const [params, setParams] = useState<ElectrolyzerParams | SmrParams>(initialState.params)
   const [result, setResult] = useState<Tier1Result | null>(null)
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
+  const [capacityMode, setCapacityMode] = useState<'system' | 'production'>('system')
+  const [targetH2KgPerDay, setTargetH2KgPerDay] = useState<number>(() => {
+    const p = initialState.params as ElectrolyzerParams
+    return Math.round(p.systemCapacity * p.capacityFactor * 24 / (p.energyConsumption || 52))
+  })
 
   const storage = useLcohStorage()
 
@@ -101,6 +106,14 @@ export default function Tier1Calculator({ t, lang }: Props) {
 
   const setField = (key: string, value: number) => {
     setParams((prev) => ({ ...prev, [key]: value }))
+  }
+
+  // 생산량 기준 모드: kg/day 입력 → systemCapacity 역산
+  const handleProductionChange = (kgPerDay: number) => {
+    setTargetH2KgPerDay(kgPerDay)
+    const elecP = params as ElectrolyzerParams
+    const derived = kgPerDay * elecP.energyConsumption / (24 * elecP.capacityFactor)
+    setField('systemCapacity', Math.round(derived))
   }
 
   // 에러 있는 필드 확인 헬퍼
@@ -224,13 +237,66 @@ export default function Tier1Calculator({ t, lang }: Props) {
           ) : (
             // 전해조 경로 파라미터
             <>
-              <NumInput
-                label={t.lcoh.systemCapacity}
-                value={(params as ElectrolyzerParams).systemCapacity}
-                onChange={(v) => setField('systemCapacity', v)}
-                step={100}
-                error={fieldError('systemCapacity')}
-              />
+              {/* 입력 기준 토글 */}
+              <div className="col-span-2 mb-1">
+                <span className="text-xs font-medium text-gray-600 mr-2">{t.lcoh.capacityMode}:</span>
+                <button
+                  type="button"
+                  onClick={() => setCapacityMode('system')}
+                  className={`text-xs px-3 py-1 rounded-full mr-1 transition-colors ${
+                    capacityMode === 'system'
+                      ? 'bg-blue-600 text-white'
+                      : 'border border-gray-300 text-gray-600 hover:bg-blue-50'
+                  }`}
+                >
+                  {t.lcoh.capacityModeSystem}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCapacityMode('production')}
+                  className={`text-xs px-3 py-1 rounded-full transition-colors ${
+                    capacityMode === 'production'
+                      ? 'bg-blue-600 text-white'
+                      : 'border border-gray-300 text-gray-600 hover:bg-blue-50'
+                  }`}
+                >
+                  {t.lcoh.capacityModeProduction}
+                </button>
+              </div>
+
+              {/* 모드별 첫 번째 입력 */}
+              {capacityMode === 'system' ? (
+                <div>
+                  <NumInput
+                    label={t.lcoh.systemCapacity}
+                    value={(params as ElectrolyzerParams).systemCapacity}
+                    onChange={(v) => {
+                      setField('systemCapacity', v)
+                      const elecP = params as ElectrolyzerParams
+                      setTargetH2KgPerDay(Math.round(v * elecP.capacityFactor * 24 / elecP.energyConsumption))
+                    }}
+                    step={100}
+                    error={fieldError('systemCapacity')}
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    {t.lcoh.derivedDailyProduction}: {Math.round((params as ElectrolyzerParams).systemCapacity * (params as ElectrolyzerParams).capacityFactor * 24 / (params as ElectrolyzerParams).energyConsumption).toLocaleString()} kg/day
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <NumInput
+                    label={t.lcoh.targetH2Production}
+                    value={targetH2KgPerDay}
+                    onChange={handleProductionChange}
+                    step={100}
+                    error={fieldError('systemCapacity')}
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    {t.lcoh.derivedSystemCapacity}: {((params as ElectrolyzerParams).systemCapacity).toLocaleString()} kW
+                  </p>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">{t.lcoh.capex}</label>
                 <CapexBreakdown

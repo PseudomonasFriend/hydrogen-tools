@@ -48,6 +48,12 @@ export const ko = {
  ccsCost: 'CCS 비용 ($/kg H₂)',
  lifetime: '설계 수명 (년)',
  resetDefaults: '기본값 복원',
+ capacityMode: '입력 기준',
+ capacityModeSystem: '설비 용량 기준',
+ capacityModeProduction: '수소 생산량 기준',
+ targetH2Production: '수소 생산량 목표 (kg/day)',
+ derivedSystemCapacity: '산출 설비 용량',
+ derivedDailyProduction: '산출 일일 생산량',
  },
   pathways: {
  pem: 'PEM 전해조',

@@ -50,6 +50,12 @@ export const en: Translations = {
     ccsCost: 'CCS Cost ($/kg H₂)',
     lifetime: 'Lifetime (years)',
     resetDefaults: 'Reset to Defaults',
+    capacityMode: 'Input Mode',
+    capacityModeSystem: 'System Capacity',
+    capacityModeProduction: 'H₂ Production',
+    targetH2Production: 'H₂ Production Target (kg/day)',
+    derivedSystemCapacity: 'Derived System Capacity',
+    derivedDailyProduction: 'Derived Daily Production',
   },
   pathways: {
     pem: 'PEM Electrolyzer',
