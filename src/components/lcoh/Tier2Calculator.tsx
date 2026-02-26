@@ -7,11 +7,13 @@ import type { Translations } from '@/lib/i18n/ko'
 import { DEFAULT_PARAMS, DEFAULT_T2_EXTRA } from '@/lib/lcoh/pathways'
 import { calcElectrolyzerLCOH_T2, calcSmrLCOH_T2, calcSensitivity } from '@/lib/lcoh/calculations'
 import { useLcohStorage } from '@/hooks/useLcohStorage'
+import { useCurrency } from '@/hooks/useCurrency'
 import PathwaySelector from './PathwaySelector'
 import ResultChart from './ResultChart'
 import TornadoChart from './TornadoChart'
 import CapexBreakdown from './CapexBreakdown'
 import SmrCapexBreakdown from './SmrCapexBreakdown'
+import CurrencySelector from '@/components/CurrencySelector'
 
 const SMR_PATHWAYS: PathwayId[] = ['smr', 'smr_ccs', 'atr_ccs', 'coal']
 
@@ -55,6 +57,7 @@ export default function Tier2Calculator({ t, lang }: Props) {
   })
 
   const storage = useLcohStorage()
+  const currencyCtx = useCurrency()
 
   const handlePathwayChange = (id: PathwayId) => {
     storage.savePathway(id)
@@ -92,6 +95,7 @@ export default function Tier2Calculator({ t, lang }: Props) {
   const handleProductionChange = (kgPerDay: number) => {
     setTargetH2KgPerDay(kgPerDay)
     const elecP = params as ElectrolyzerParams
+    if (!elecP.capacityFactor || !elecP.energyConsumption) return
     const derived = kgPerDay * elecP.energyConsumption / (24 * elecP.capacityFactor)
     setField('systemCapacity', Math.round(derived))
   }
@@ -208,12 +212,14 @@ export default function Tier2Calculator({ t, lang }: Props) {
                         onChange={(v) => {
                           setField('systemCapacity', v)
                           const elecP = params as ElectrolyzerParams
-                          setTargetH2KgPerDay(Math.round(v * elecP.capacityFactor * 24 / elecP.energyConsumption))
+                          if (elecP.energyConsumption) {
+                            setTargetH2KgPerDay(Math.round(v * elecP.capacityFactor * 24 / elecP.energyConsumption))
+                          }
                         }}
                         step={100}
                       />
                       <p className="text-xs text-gray-400 mt-1">
-                        {t.lcoh.derivedDailyProduction}: {Math.round((params as ElectrolyzerParams).systemCapacity * (params as ElectrolyzerParams).capacityFactor * 24 / (params as ElectrolyzerParams).energyConsumption).toLocaleString()} kg/day
+                        {t.lcoh.derivedDailyProduction}: {(params as ElectrolyzerParams).energyConsumption ? Math.round((params as ElectrolyzerParams).systemCapacity * (params as ElectrolyzerParams).capacityFactor * 24 / (params as ElectrolyzerParams).energyConsumption).toLocaleString() : '—'} kg/day
                       </p>
                     </div>
                   ) : (
@@ -341,18 +347,21 @@ export default function Tier2Calculator({ t, lang }: Props) {
         <>
           {/* Tier 1 vs Tier 2 비교 */}
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <h2 className="text-sm font-medium text-gray-600 mb-4">{t.lcoh.result}</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-medium text-gray-600">{t.lcoh.result}</h2>
+              <CurrencySelector {...currencyCtx} />
+            </div>
 
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="text-center py-4 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="text-xs text-gray-500 mb-1">{t.lcoh2.tier1Compare}</div>
-                <div className="text-3xl font-bold text-gray-600">${result.tier1Lcoh.toFixed(2)}</div>
-                <div className="text-xs text-gray-400 mt-1">{t.lcoh.unit}</div>
+                <div className="text-3xl font-bold text-gray-600">{currencyCtx.currencyInfo.symbol}{currencyCtx.convert(result.tier1Lcoh).toFixed(currencyCtx.currencyInfo.decimals)}</div>
+                <div className="text-xs text-gray-400 mt-1">{currencyCtx.currencyInfo.code}/kg H₂</div>
               </div>
               <div className="text-center py-4 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="text-xs text-blue-600 mb-1">{t.lcoh2.tier2Compare}</div>
-                <div className="text-4xl font-bold text-blue-700">${result.lcoh.toFixed(2)}</div>
-                <div className="text-xs text-blue-400 mt-1">{t.lcoh.unit}</div>
+                <div className="text-4xl font-bold text-blue-700">{currencyCtx.currencyInfo.symbol}{currencyCtx.convert(result.lcoh).toFixed(currencyCtx.currencyInfo.decimals)}</div>
+                <div className="text-xs text-blue-400 mt-1">{currencyCtx.currencyInfo.code}/kg H₂</div>
               </div>
             </div>
 
@@ -364,11 +373,11 @@ export default function Tier2Calculator({ t, lang }: Props) {
 
             {/* 비용 구성 배지 */}
             <div className={`grid gap-2 mb-4 ${!isSmr && result.stackReplComponent > 0 ? 'grid-cols-4' : 'grid-cols-3'}`}>
-              <CostBadge label={t.lcoh.capexLabel} value={result.capexComponent} color="blue" />
-              <CostBadge label={t.lcoh.opexLabel} value={result.opexComponent} color="amber" />
-              <CostBadge label={t.lcoh.fuelLabel} value={result.fuelComponent} color="red" />
+              <CostBadge label={t.lcoh.capexLabel} value={result.capexComponent} color="blue" convert={currencyCtx.convert} currencyInfo={currencyCtx.currencyInfo} />
+              <CostBadge label={t.lcoh.opexLabel} value={result.opexComponent} color="amber" convert={currencyCtx.convert} currencyInfo={currencyCtx.currencyInfo} />
+              <CostBadge label={t.lcoh.fuelLabel} value={result.fuelComponent} color="red" convert={currencyCtx.convert} currencyInfo={currencyCtx.currencyInfo} />
               {!isSmr && result.stackReplComponent > 0 && (
-                <CostBadge label={t.lcoh2.stackReplLabel} value={result.stackReplComponent} color="purple" />
+                <CostBadge label={t.lcoh2.stackReplLabel} value={result.stackReplComponent} color="purple" convert={currencyCtx.convert} currencyInfo={currencyCtx.currencyInfo} />
               )}
             </div>
 
@@ -430,10 +439,14 @@ function CostBadge({
   label,
   value,
   color,
+  convert,
+  currencyInfo,
 }: {
   label: string
   value: number
   color: 'blue' | 'amber' | 'red' | 'purple'
+  convert: (usdValue: number) => number
+  currencyInfo: { symbol: string; decimals: number }
 }) {
   const colorMap = {
     blue:   'bg-blue-50 text-blue-700 border-blue-200',
@@ -441,10 +454,12 @@ function CostBadge({
     red:    'bg-red-50 text-red-700 border-red-200',
     purple: 'bg-purple-50 text-purple-700 border-purple-200',
   }
+  // 구성 항목은 소수점 3자리(USD) 또는 통화별 소수점에 맞춤
+  const displayDecimals = currencyInfo.decimals === 0 ? 0 : 3
   return (
     <div className={`border rounded-lg p-2 text-center ${colorMap[color]}`}>
       <div className="text-xs truncate mb-1">{label}</div>
-      <div className="text-sm font-semibold">${value.toFixed(3)}</div>
+      <div className="text-sm font-semibold">{currencyInfo.symbol}{convert(value).toFixed(displayDecimals)}</div>
     </div>
   )
 }

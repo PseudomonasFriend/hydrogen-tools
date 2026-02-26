@@ -6,11 +6,13 @@ import type { Translations } from '@/lib/i18n/ko'
 import { DEFAULT_PARAMS, DEFAULT_T2_EXTRA, DEFAULT_T3_EXTRA } from '@/lib/lcoh/pathways'
 import { calcTier3, calcBreakEven } from '@/lib/lcoh/calculations'
 import { useLcohStorage } from '@/hooks/useLcohStorage'
+import { useCurrency } from '@/hooks/useCurrency'
 import PathwaySelector from './PathwaySelector'
 import CashFlowTable from './CashFlowTable'
 import NpvChart from './NpvChart'
 import CapexBreakdown from './CapexBreakdown'
 import SmrCapexBreakdown from './SmrCapexBreakdown'
+import CurrencySelector from '@/components/CurrencySelector'
 
 const SMR_PATHWAYS: PathwayId[] = ['smr', 'smr_ccs', 'atr_ccs', 'coal']
 
@@ -57,6 +59,7 @@ export default function Tier3Calculator({ t, lang }: Props) {
   })
 
   const storage = useLcohStorage()
+  const currencyCtx = useCurrency()
 
   const handlePathwayChange = (id: PathwayId) => {
     storage.savePathway(id)
@@ -96,6 +99,7 @@ export default function Tier3Calculator({ t, lang }: Props) {
   const handleProductionChange = (kgPerDay: number) => {
     setTargetH2KgPerDay(kgPerDay)
     const elecP = params as ElectrolyzerParams
+    if (!elecP.capacityFactor || !elecP.energyConsumption) return
     const derived = kgPerDay * elecP.energyConsumption / (24 * elecP.capacityFactor)
     setField('systemCapacity', Math.round(derived))
   }
@@ -210,12 +214,14 @@ export default function Tier3Calculator({ t, lang }: Props) {
                         onChange={(v) => {
                           setField('systemCapacity', v)
                           const elecP = params as ElectrolyzerParams
-                          setTargetH2KgPerDay(Math.round(v * elecP.capacityFactor * 24 / elecP.energyConsumption))
+                          if (elecP.energyConsumption) {
+                            setTargetH2KgPerDay(Math.round(v * elecP.capacityFactor * 24 / elecP.energyConsumption))
+                          }
                         }}
                         step={100}
                       />
                       <p className="text-xs text-gray-400 mt-1">
-                        {t.lcoh.derivedDailyProduction}: {Math.round((params as ElectrolyzerParams).systemCapacity * (params as ElectrolyzerParams).capacityFactor * 24 / (params as ElectrolyzerParams).energyConsumption).toLocaleString()} kg/day
+                        {t.lcoh.derivedDailyProduction}: {(params as ElectrolyzerParams).energyConsumption ? Math.round((params as ElectrolyzerParams).systemCapacity * (params as ElectrolyzerParams).capacityFactor * 24 / (params as ElectrolyzerParams).energyConsumption).toLocaleString() : '—'} kg/day
                       </p>
                     </div>
                   ) : (
@@ -307,11 +313,14 @@ export default function Tier3Calculator({ t, lang }: Props) {
         <>
           {/* 투자 요약 */}
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <h2 className="text-sm font-medium text-gray-600 mb-4">{t.lcoh3.summary}</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-medium text-gray-600">{t.lcoh3.summary}</h2>
+              <CurrencySelector {...currencyCtx} />
+            </div>
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
               <SummaryCard
                 label={t.lcoh3.npv}
-                value={`$${(result.npv / 1_000_000).toFixed(2)}M`}
+                value={`${currencyCtx.currencyInfo.symbol}${(currencyCtx.convert(result.npv) / 1_000_000).toFixed(2)}M`}
                 positive={result.npv >= 0}
               />
               <SummaryCard
@@ -326,16 +335,16 @@ export default function Tier3Calculator({ t, lang }: Props) {
               />
               <SummaryCard
                 label={t.lcoh3.lcohRef}
-                value={`$${result.lcoh.toFixed(2)}/kg`}
+                value={`${currencyCtx.currencyInfo.symbol}${currencyCtx.convert(result.lcoh).toFixed(currencyCtx.currencyInfo.decimals)}/kg`}
                 positive={result.lcoh < t3Params.h2SellingPrice}
               />
               {breakEvenResult && (
                 <SummaryCard
                   label={t.lcoh3.breakEvenPrice}
-                  value={`$${breakEvenResult.breakEvenPrice.toFixed(2)}/kg`}
+                  value={`${currencyCtx.currencyInfo.symbol}${currencyCtx.convert(breakEvenResult.breakEvenPrice).toFixed(currencyCtx.currencyInfo.decimals)}/kg`}
                   positive={breakEvenResult.margin >= 0}
                   subLabel={breakEvenResult.margin >= 0 ? t.lcoh3.breakEvenPositive : t.lcoh3.breakEvenNegative}
-                  subValue={`${breakEvenResult.margin >= 0 ? '+' : ''}$${breakEvenResult.margin.toFixed(2)}`}
+                  subValue={`${breakEvenResult.margin >= 0 ? '+' : ''}${currencyCtx.currencyInfo.symbol}${currencyCtx.convert(Math.abs(breakEvenResult.margin)).toFixed(currencyCtx.currencyInfo.decimals)}`}
                 />
               )}
             </div>
@@ -356,7 +365,7 @@ export default function Tier3Calculator({ t, lang }: Props) {
                 >
                   <div className="text-xs font-medium text-gray-500 mb-2">{scenarioLabel(s.id)}</div>
                   <div className={`text-lg font-bold ${s.npv >= 0 ? 'text-green-700' : 'text-red-600'}`}>
-                    ${(s.npv / 1_000_000).toFixed(2)}M
+                    {currencyCtx.currencyInfo.symbol}{(currencyCtx.convert(s.npv) / 1_000_000).toFixed(2)}M
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
                     IRR {(s.irr * 100).toFixed(1)}% · {s.paybackYear !== null ? `${s.paybackYear}${t.lcoh3.paybackYearUnit}` : t.lcoh3.paybackNever}
