@@ -2,6 +2,7 @@ import type { Lang } from '@/lib/lcoh/types'
 import { ko } from '@/lib/i18n/ko'
 import { en } from '@/lib/i18n/en'
 import Tier1Calculator from '@/components/lcoh/Tier1Calculator'
+import PathwayComparison from '@/components/lcoh/PathwayComparison'
 
 const translations = { ko, en }
 
@@ -16,6 +17,9 @@ export default async function LcohPage({ params }: { params: Promise<{ lang: str
         <p className="text-sm text-gray-500 mt-1">{t.lcoh.subtitle}</p>
       </div>
       <Tier1Calculator t={t} lang={lang as Lang} />
+      <div className="mt-6">
+        <PathwayComparison t={t} lang={lang as Lang} />
+      </div>
     </div>
   )
 }
