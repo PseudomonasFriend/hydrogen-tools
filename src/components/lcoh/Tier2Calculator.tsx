@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { PathwayId, ElectrolyzerParams, SmrParams, Tier2ExtraParams, Tier2Result, SensitivityPoint } from '@/lib/lcoh/types'
 import type { Lang } from '@/lib/lcoh/types'
 import type { Translations } from '@/lib/i18n/ko'
@@ -22,24 +22,32 @@ interface Props {
   lang: Lang
 }
 
+function useInitialState() {
+  const storage = useLcohStorage()
+  const savedPathway = storage.loadPathway()
+  if (savedPathway) {
+    return {
+      pathway: savedPathway,
+      params: storage.loadParams(savedPathway, DEFAULT_PARAMS[savedPathway]),
+      t2Params: storage.loadT2(savedPathway, DEFAULT_T2_EXTRA[savedPathway]),
+    }
+  }
+  return {
+    pathway: 'pem' as PathwayId,
+    params: DEFAULT_PARAMS['pem'] as ElectrolyzerParams,
+    t2Params: DEFAULT_T2_EXTRA['pem'],
+  }
+}
+
 export default function Tier2Calculator({ t }: Props) {
-  const [pathway, setPathway] = useState<PathwayId>('pem')
-  const [params, setParams] = useState<ElectrolyzerParams | SmrParams>(DEFAULT_PARAMS['pem'] as ElectrolyzerParams)
-  const [t2Params, setT2Params] = useState<Tier2ExtraParams>(DEFAULT_T2_EXTRA['pem'])
+  const initialState = useInitialState()
+  const [pathway, setPathway] = useState<PathwayId>(initialState.pathway)
+  const [params, setParams] = useState<ElectrolyzerParams | SmrParams>(initialState.params)
+  const [t2Params, setT2Params] = useState<Tier2ExtraParams>(initialState.t2Params)
   const [result, setResult] = useState<Tier2Result | null>(null)
   const [sensitivities, setSensitivities] = useState<SensitivityPoint[]>([])
 
   const storage = useLcohStorage()
-
-  // 초기 로드 (경로 + 파라미터 + t2Params)
-  useEffect(() => {
-    const savedPathway = storage.loadPathway()
-    if (savedPathway) {
-      setPathway(savedPathway)
-      setParams(storage.loadParams(savedPathway, DEFAULT_PARAMS[savedPathway]))
-      setT2Params(storage.loadT2(savedPathway, DEFAULT_T2_EXTRA[savedPathway]))
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePathwayChange = (id: PathwayId) => {
     storage.savePathway(id)

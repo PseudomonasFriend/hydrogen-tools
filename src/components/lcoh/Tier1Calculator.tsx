@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { PathwayId, ElectrolyzerParams, SmrParams, Tier1Result } from '@/lib/lcoh/types'
 import { isSmrParams } from '@/lib/lcoh/types'
 import type { Lang } from '@/lib/lcoh/types'
@@ -26,22 +26,29 @@ interface Props {
   lang: Lang
 }
 
+function useInitialState() {
+  const storage = useLcohStorage()
+  const savedPathway = storage.loadPathway()
+  if (savedPathway) {
+    return {
+      pathway: savedPathway,
+      params: storage.loadParams(savedPathway, DEFAULT_PARAMS[savedPathway]),
+    }
+  }
+  return {
+    pathway: 'pem' as PathwayId,
+    params: DEFAULT_PARAMS['pem'] as ElectrolyzerParams,
+  }
+}
+
 export default function Tier1Calculator({ t, lang }: Props) {
-  const [pathway, setPathway] = useState<PathwayId>('pem')
-  const [params, setParams] = useState<ElectrolyzerParams | SmrParams>(DEFAULT_PARAMS['pem'] as ElectrolyzerParams)
+  const initialState = useInitialState()
+  const [pathway, setPathway] = useState<PathwayId>(initialState.pathway)
+  const [params, setParams] = useState<ElectrolyzerParams | SmrParams>(initialState.params)
   const [result, setResult] = useState<Tier1Result | null>(null)
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
 
   const storage = useLcohStorage()
-
-  // 초기 로드 (경로 + 파라미터)
-  useEffect(() => {
-    const savedPathway = storage.loadPathway()
-    if (savedPathway) {
-      setPathway(savedPathway)
-      setParams(storage.loadParams(savedPathway, DEFAULT_PARAMS[savedPathway]))
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePathwayChange = (newPathway: PathwayId) => {
     storage.savePathway(newPathway)

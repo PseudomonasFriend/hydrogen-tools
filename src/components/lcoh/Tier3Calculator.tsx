@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { PathwayId, ElectrolyzerParams, SmrParams, Tier2ExtraParams, Tier3ExtraParams, Tier3Result, BreakEvenResult, Lang } from '@/lib/lcoh/types'
 import type { Translations } from '@/lib/i18n/ko'
 import { DEFAULT_PARAMS, DEFAULT_T2_EXTRA, DEFAULT_T3_EXTRA } from '@/lib/lcoh/pathways'
@@ -21,26 +21,35 @@ interface Props {
   lang: Lang
 }
 
+function useInitialState() {
+  const storage = useLcohStorage()
+  const savedPathway = storage.loadPathway()
+  if (savedPathway) {
+    return {
+      pathway: savedPathway,
+      params: storage.loadParams(savedPathway, DEFAULT_PARAMS[savedPathway]),
+      t2Params: storage.loadT2(savedPathway, DEFAULT_T2_EXTRA[savedPathway]),
+      t3Params: storage.loadT3(savedPathway, DEFAULT_T3_EXTRA[savedPathway]),
+    }
+  }
+  return {
+    pathway: 'pem' as PathwayId,
+    params: DEFAULT_PARAMS['pem'] as ElectrolyzerParams,
+    t2Params: DEFAULT_T2_EXTRA['pem'],
+    t3Params: DEFAULT_T3_EXTRA['pem'],
+  }
+}
+
 export default function Tier3Calculator({ t }: Props) {
-  const [pathway, setPathway] = useState<PathwayId>('pem')
-  const [params, setParams] = useState<ElectrolyzerParams | SmrParams>(DEFAULT_PARAMS['pem'] as ElectrolyzerParams)
-  const [t2Params, setT2Params] = useState<Tier2ExtraParams>(DEFAULT_T2_EXTRA['pem'])
-  const [t3Params, setT3Params] = useState<Tier3ExtraParams>(DEFAULT_T3_EXTRA['pem'])
+  const initialState = useInitialState()
+  const [pathway, setPathway] = useState<PathwayId>(initialState.pathway)
+  const [params, setParams] = useState<ElectrolyzerParams | SmrParams>(initialState.params)
+  const [t2Params, setT2Params] = useState<Tier2ExtraParams>(initialState.t2Params)
+  const [t3Params, setT3Params] = useState<Tier3ExtraParams>(initialState.t3Params)
   const [result, setResult] = useState<Tier3Result | null>(null)
   const [breakEvenResult, setBreakEvenResult] = useState<BreakEvenResult | null>(null)
 
   const storage = useLcohStorage()
-
-  // 초기 로드 (경로 + 파라미터 + t2Params + t3Params)
-  useEffect(() => {
-    const savedPathway = storage.loadPathway()
-    if (savedPathway) {
-      setPathway(savedPathway)
-      setParams(storage.loadParams(savedPathway, DEFAULT_PARAMS[savedPathway]))
-      setT2Params(storage.loadT2(savedPathway, DEFAULT_T2_EXTRA[savedPathway]))
-      setT3Params(storage.loadT3(savedPathway, DEFAULT_T3_EXTRA[savedPathway]))
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePathwayChange = (id: PathwayId) => {
     storage.savePathway(id)
