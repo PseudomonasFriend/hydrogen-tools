@@ -4,7 +4,7 @@ import type { PathwayId, PathwayParams, Tier2ExtraParams, Tier3ExtraParams } fro
 export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
   pem: {
     systemCapacity: 1000,
-    capex: 1400,               // IEA 2024: $1,400~1,700/kW
+    capex: 1000,               // IEA 2024 중간값: $1,000/kW (범위: $700~1,400/kW)
     opexRate: 0.04,
     capacityFactor: 0.45,
     energyConsumption: 52,     // IEA 2024: 52~55 kWh/kg H₂
@@ -13,7 +13,7 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
   },
   alk: {
     systemCapacity: 1000,
-    capex: 800,                // IEA 2024: $800~1,000/kW (성숙 기술)
+    capex: 600,                // IEA 2024 중간값: $600/kW (범위: $400~800/kW, 성숙 기술)
     opexRate: 0.03,
     capacityFactor: 0.50,
     energyConsumption: 50,     // 효율 개선 반영
@@ -33,7 +33,7 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
     systemCapacity: 1000,
     capex: 3100,               // IEA 2024: (1700+700+400)×1.12 = 3,136 → 3,100
     opexRate: 0.05,
-    capacityFactor: 0.85,
+    capacityFactor: 0.70,      // 2024 실증 수준 현실적 값 (0.85는 과낙관적)
     energyConsumption: 43,     // 37은 열통합 이상적 조건, 현실적 값은 42~45
     electricityCost: 0.04,
     lifetime: 10,
@@ -49,7 +49,7 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
   },
   smr_ccs: {
     plantCapacity: 100,
-    capexPerTpd: 10_000_000,   // CCS 설비비 상승
+    capexPerTpd: 8_500_000,    // IEA 2024 중간값 (범위: $7.5~14M/tpd)
     opexRate: 0.045,
     capacityFactor: 0.90,
     naturalGasCostPerKgH2: 1.2,

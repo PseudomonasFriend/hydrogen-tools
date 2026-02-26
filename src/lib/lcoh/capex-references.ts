@@ -131,7 +131,7 @@ export const ALK_CAPEX_REFS: ElectrolyzerCapexRef[] = [
     labelEn: 'Custom',
     source: '',
     year: 2024,
-    totalCapex: 800,
+    totalCapex: 600,
   },
 ]
 
@@ -252,7 +252,7 @@ export const SMR_CCS_CAPEX_REFS: SmrCapexRef[] = [
     labelEn: 'Custom',
     source: '',
     year: 2024,
-    totalCapex: 10_000_000,
+    totalCapex: 8_500_000,
   },
 ]
 

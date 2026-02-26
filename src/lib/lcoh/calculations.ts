@@ -254,8 +254,9 @@ function buildElectrolyzerCashFlows(
   scenario: Tier3Scenario
 ): CashFlowRow[] {
   const capexTotal = p.systemCapacity * p.capex * scenario.capexMultiplier
+  const baseCapex = p.systemCapacity * p.capex  // 기준 CapEx (시나리오 승수 미적용)
   const H2_annual = (p.systemCapacity * p.capacityFactor * 8760) / p.energyConsumption
-  const opexAnnual = capexTotal * p.opexRate * scenario.opexMultiplier
+  const opexAnnual = baseCapex * p.opexRate * scenario.opexMultiplier
   const fuelAnnual = H2_annual * p.electricityCost * p.energyConsumption * scenario.fuelMultiplier
   const annualDepreciation = capexTotal / t3.depreciationYears
   const wacc = t2.wacc
@@ -341,8 +342,9 @@ function buildSmrCashFlows(
   scenario: Tier3Scenario
 ): CashFlowRow[] {
   const capexTotal = p.capexPerTpd * p.plantCapacity * scenario.capexMultiplier
+  const baseCapex = p.capexPerTpd * p.plantCapacity  // 기준 CapEx (시나리오 승수 미적용)
   const H2_annual = p.plantCapacity * 1000 * 365 * p.capacityFactor
-  const opexAnnual = capexTotal * p.opexRate * scenario.opexMultiplier
+  const opexAnnual = baseCapex * p.opexRate * scenario.opexMultiplier
   // co2 비용: (kg CO₂/kg H₂) × ($/tonne CO₂) / 1000 (tonne 환산) = $/kg H₂
   const co2CostPerKg = (p.co2EmissionFactor ?? 0) * (t2.co2Price ?? 0) / 1000
   const fuelCostPerKg = ((p.naturalGasCostPerKgH2 ?? 0) + (p.ccsCostPerKgH2 ?? 0) + (p.coalCostPerKgH2 ?? 0) + co2CostPerKg) * scenario.fuelMultiplier
