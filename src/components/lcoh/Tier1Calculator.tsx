@@ -175,13 +175,16 @@ export default function Tier1Calculator({ t, lang }: Props) {
                 max={100}
                 error={fieldError('capacityFactor')}
               />
-              <NumInput
-                label={t.lcoh.naturalGasCost}
-                value={(params as SmrParams).naturalGasCostPerKgH2}
-                onChange={(v) => setField('naturalGasCostPerKgH2', v)}
-                step={0.1}
-                error={fieldError('naturalGasCostPerKgH2')}
-              />
+              <div>
+                <NumInput
+                  label={t.lcoh.naturalGasCost}
+                  value={(params as SmrParams).naturalGasCostPerKgH2}
+                  onChange={(v) => setField('naturalGasCostPerKgH2', v)}
+                  step={0.1}
+                  error={fieldError('naturalGasCostPerKgH2')}
+                />
+                <p className="text-xs text-gray-400 mt-1">※ $/MMBtu × 0.12 ≈ $/kg H₂</p>
+              </div>
               {(pathway === 'smr_ccs' || pathway === 'atr_ccs') && (
                 <NumInput
                   label={t.lcoh.ccsCost}

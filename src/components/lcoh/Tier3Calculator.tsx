@@ -136,7 +136,10 @@ export default function Tier3Calculator({ t }: Props) {
                   <NumInput label={t.lcoh.capexPerTpd} value={(params as SmrParams).capexPerTpd} onChange={(v) => setField('capexPerTpd', v)} step={100000} />
                   <NumInput label={t.lcoh.opexRate} value={(params as SmrParams).opexRate * 100} onChange={(v) => setField('opexRate', v / 100)} step={0.5} min={0} max={20} />
                   <NumInput label={t.lcoh.capacityFactor} value={(params as SmrParams).capacityFactor * 100} onChange={(v) => setField('capacityFactor', v / 100)} step={1} min={0} max={100} />
-                  <NumInput label={t.lcoh.naturalGasCost} value={(params as SmrParams).naturalGasCostPerKgH2} onChange={(v) => setField('naturalGasCostPerKgH2', v)} step={0.1} />
+                  <div>
+                    <NumInput label={t.lcoh.naturalGasCost} value={(params as SmrParams).naturalGasCostPerKgH2} onChange={(v) => setField('naturalGasCostPerKgH2', v)} step={0.1} />
+                    <p className="text-xs text-gray-400 mt-1">※ $/MMBtu × 0.12 ≈ $/kg H₂</p>
+                  </div>
                   {(pathway === 'smr_ccs' || pathway === 'atr_ccs') && (
                     <NumInput label={t.lcoh.ccsCost} value={(params as SmrParams).ccsCostPerKgH2 ?? 0} onChange={(v) => setField('ccsCostPerKgH2', v)} step={0.1} />
                   )}
@@ -179,6 +182,14 @@ export default function Tier3Calculator({ t }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <NumInput label={t.lcoh3.h2SellingPrice} value={t3Params.h2SellingPrice} onChange={(v) => setT3Field('h2SellingPrice', v)} step={0.5} min={0} />
               <NumInput label={t.lcoh3.subsidyPerKgH2} value={t3Params.subsidyPerKgH2} onChange={(v) => setT3Field('subsidyPerKgH2', v)} step={0.1} min={0} max={10} />
+              <NumInput
+                label={t.lcoh3.subsidyDurationYears}
+                value={t3Params.subsidyDurationYears}
+                onChange={(v) => setT3Field('subsidyDurationYears', v)}
+                step={1}
+                min={0}
+                max={30}
+              />
               <NumInput label={t.lcoh3.taxRate} value={t3Params.taxRate * 100} onChange={(v) => setT3Field('taxRate', v / 100)} step={1} min={0} max={50} />
               <NumInput label={t.lcoh3.depreciationYears} value={t3Params.depreciationYears} onChange={(v) => setT3Field('depreciationYears', v)} step={1} min={1} max={30} />
               <div>
