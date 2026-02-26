@@ -103,7 +103,7 @@ export const en: Translations = {
     paybackYear: 'Payback Period',
     paybackYearUnit: 'years',
     paybackNever: 'Not recoverable',
-    lcohRef: 'Tier 2 LCOH (Reference)',
+    lcohRef: 'T2 LCOH (excl. construction period & tax)',
     cashFlowTable: 'Year-by-Year Cash Flow',
     npvChart: 'Cumulative NPV Curve',
     scenarioComparison: 'Scenario Comparison',

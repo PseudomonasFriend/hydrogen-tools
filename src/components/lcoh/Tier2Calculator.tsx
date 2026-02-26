@@ -166,7 +166,7 @@ export default function Tier2Calculator({ t, lang }: Props) {
                   <NumInput label={t.lcoh.capacityFactor} value={(params as SmrParams).capacityFactor * 100} onChange={(v) => setField('capacityFactor', v / 100)} step={1} min={0} max={100} />
                   <div>
                     <NumInput label={t.lcoh.naturalGasCost} value={(params as SmrParams).naturalGasCostPerKgH2} onChange={(v) => setField('naturalGasCostPerKgH2', v)} step={0.1} />
-                    <p className="text-xs text-gray-400 mt-1">※ $/MMBtu × 0.20 ≈ $/kg H₂</p>
+                    <p className="text-xs text-gray-400 mt-1">※ $/MMBtu × 0.15 ≈ $/kg H₂ (SMR, ~170 MJ/kg H₂ 기준)</p>
                   </div>
                   {(pathway === 'smr_ccs' || pathway === 'atr_ccs') && (
                     <NumInput label={t.lcoh.ccsCost} value={(params as SmrParams).ccsCostPerKgH2 ?? 0} onChange={(v) => setField('ccsCostPerKgH2', v)} step={0.1} />

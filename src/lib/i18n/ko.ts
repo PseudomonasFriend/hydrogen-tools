@@ -101,7 +101,7 @@ export const ko = {
  paybackYear: '투자 회수 기간',
  paybackYearUnit: '년',
  paybackNever: '회수 불가',
- lcohRef: 'Tier 2 LCOH (참조)',
+ lcohRef: 'T2 LCOH (건설기간·세금 미반영)',
  cashFlowTable: '연도별 현금흐름',
  npvChart: '누적 NPV 곡선',
  scenarioComparison: '시나리오 비교',

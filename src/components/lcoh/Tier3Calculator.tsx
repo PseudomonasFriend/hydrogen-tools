@@ -168,7 +168,7 @@ export default function Tier3Calculator({ t, lang }: Props) {
                   <NumInput label={t.lcoh.capacityFactor} value={(params as SmrParams).capacityFactor * 100} onChange={(v) => setField('capacityFactor', v / 100)} step={1} min={0} max={100} />
                   <div>
                     <NumInput label={t.lcoh.naturalGasCost} value={(params as SmrParams).naturalGasCostPerKgH2} onChange={(v) => setField('naturalGasCostPerKgH2', v)} step={0.1} />
-                    <p className="text-xs text-gray-400 mt-1">※ $/MMBtu × 0.20 ≈ $/kg H₂</p>
+                    <p className="text-xs text-gray-400 mt-1">※ $/MMBtu × 0.15 ≈ $/kg H₂ (SMR, ~170 MJ/kg H₂ 기준)</p>
                   </div>
                   {(pathway === 'smr_ccs' || pathway === 'atr_ccs') && (
                     <NumInput label={t.lcoh.ccsCost} value={(params as SmrParams).ccsCostPerKgH2 ?? 0} onChange={(v) => setField('ccsCostPerKgH2', v)} step={0.1} />
@@ -331,8 +331,8 @@ export default function Tier3Calculator({ t, lang }: Props) {
               />
               <SummaryCard
                 label={t.lcoh3.irr}
-                value={`${(result.irr * 100).toFixed(1)}%`}
-                positive={result.irr > t2Params.wacc}
+                value={isNaN(result.irr) ? (lang === 'ko' ? '수익성 없음' : 'N/A') : `${(result.irr * 100).toFixed(1)}%`}
+                positive={!isNaN(result.irr) && result.irr > t2Params.wacc}
               />
               <SummaryCard
                 label={t.lcoh3.paybackYear}
@@ -374,7 +374,7 @@ export default function Tier3Calculator({ t, lang }: Props) {
                     {currencyCtx.currencyInfo.symbol}{(currencyCtx.convert(s.npv) / 1_000_000).toFixed(2)}M
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
-                    IRR {(s.irr * 100).toFixed(1)}% · {s.paybackYear !== null ? `${s.paybackYear}${t.lcoh3.paybackYearUnit}` : t.lcoh3.paybackNever}
+                    IRR {isNaN(s.irr) ? (lang === 'ko' ? '수익성 없음' : 'N/A') : `${(s.irr * 100).toFixed(1)}%`} · {s.paybackYear !== null ? `${s.paybackYear}${t.lcoh3.paybackYearUnit}` : t.lcoh3.paybackNever}
                   </div>
                 </div>
               ))}
