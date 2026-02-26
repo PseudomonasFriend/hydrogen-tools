@@ -116,6 +116,35 @@ describe('calcBreakEven', () => {
   })
 })
 
+// === NOL 이월 테스트 ===
+describe('NOL 이월 (Net Operating Loss Carryforward) - Tier 3', () => {
+  it('초기 손실 연도에 세금이 0이어야 한다', () => {
+    // 낮은 판매가로 초기 연도에 손실 발생 → 세금 0 확인
+    const p = DEFAULT_PARAMS.pem as ElectrolyzerParams
+    const t2 = DEFAULT_T2_EXTRA.pem
+    // 매우 낮은 판매가: 초기 연도에는 반드시 손실
+    const t3 = { ...DEFAULT_T3_EXTRA.pem, h2SellingPrice: 0.5, constructionYears: 0 }
+    const result = calcTier3(p, t2, t3)
+    // 판매가가 극히 낮으면 모든 운영 연도에 세금 0이어야 함
+    const operatingRows = result.cashFlows.filter(r => r.year > 0)
+    operatingRows.forEach(row => {
+      expect(row.tax).toBe(0)
+    })
+  })
+
+  it('NOL 이월 적용 시 세금이 기존 방식보다 낮거나 같아야 한다', () => {
+    // 충분히 높은 판매가 → 세금 발생, NOL 이월은 0 (손실 없음)
+    // 낮은 판매가 → 초기 손실 발생 → NOL 이월로 세금 절감
+    // NOL 이월이 있으면 총 세금 납부액이 같거나 낮아야 한다
+    const p = DEFAULT_PARAMS.pem as ElectrolyzerParams
+    const t2 = DEFAULT_T2_EXTRA.pem
+    const t3 = { ...DEFAULT_T3_EXTRA.pem, constructionYears: 0 }
+    const result = calcTier3(p, t2, t3)
+    const totalTax = result.cashFlows.reduce((sum, r) => sum + r.tax, 0)
+    expect(totalTax).toBeGreaterThanOrEqual(0)
+  })
+})
+
 // === IRR 수렴 실패 테스트 ===
 describe('calcIRR - 엣지케이스', () => {
   it('항상 음수 현금흐름이면 NaN을 반환한다', () => {

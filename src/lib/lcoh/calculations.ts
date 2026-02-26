@@ -296,6 +296,9 @@ function buildElectrolyzerCashFlows(
     }
   }
 
+  // NOL 이월 (Net Operating Loss Carryforward) 추적
+  let nolCarryforward = 0
+
   for (let t = 1; t <= p.lifetime; t++) {
     // 보조금은 subsidyDuration 이내 연도에만 적용
     const activeSubsidy = t <= subsidyDuration ? (t3.subsidyPerKgH2 ?? 0) : 0
@@ -304,8 +307,17 @@ function buildElectrolyzerCashFlows(
       ? capexTotal * t2.stackReplacement.costRate
       : 0
     const dep = t <= t3.depreciationYears ? annualDepreciation : 0
-    const taxableIncome = revenue - opexAnnual - fuelAnnual - stackRepl - dep
-    const tax = taxableIncome > 0 ? taxableIncome * t3.taxRate : 0
+    // NOL 이월 반영 세금 계산
+    const grossTaxableIncome = revenue - opexAnnual - fuelAnnual - stackRepl - dep
+    const taxableIncome = grossTaxableIncome - nolCarryforward
+    let tax: number
+    if (taxableIncome < 0) {
+      nolCarryforward = Math.abs(taxableIncome)
+      tax = 0
+    } else {
+      nolCarryforward = 0
+      tax = taxableIncome * t3.taxRate
+    }
     const netCF = revenue - opexAnnual - fuelAnnual - stackRepl - tax
     cumulativeCF += netCF
     // PV 할인: 운전 시작(Year 0) 기준으로 t년 후
@@ -374,13 +386,25 @@ function buildSmrCashFlows(
     }
   }
 
+  // NOL 이월 (Net Operating Loss Carryforward) 추적
+  let nolCarryforward = 0
+
   for (let t = 1; t <= p.lifetime; t++) {
     // 보조금은 subsidyDuration 이내 연도에만 적용
     const activeSubsidy = t <= subsidyDuration ? (t3.subsidyPerKgH2 ?? 0) : 0
     const revenue = H2_annual * (t3.h2SellingPrice * scenario.priceMultiplier + activeSubsidy)
     const dep = t <= t3.depreciationYears ? annualDepreciation : 0
-    const taxableIncome = revenue - opexAnnual - fuelAnnual - dep
-    const tax = taxableIncome > 0 ? taxableIncome * t3.taxRate : 0
+    // NOL 이월 반영 세금 계산
+    const grossTaxableIncome = revenue - opexAnnual - fuelAnnual - dep
+    const taxableIncome = grossTaxableIncome - nolCarryforward
+    let tax: number
+    if (taxableIncome < 0) {
+      nolCarryforward = Math.abs(taxableIncome)
+      tax = 0
+    } else {
+      nolCarryforward = 0
+      tax = taxableIncome * t3.taxRate
+    }
     const netCF = revenue - opexAnnual - fuelAnnual - tax
     cumulativeCF += netCF
     // PV 할인: 운전 시작(Year 0) 기준으로 t년 후
