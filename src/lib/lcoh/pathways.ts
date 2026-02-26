@@ -31,7 +31,7 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
   },
   soec: {
     systemCapacity: 1000,
-    capex: 2800,               // IEA 2024: 여전히 고가
+    capex: 3100,               // IEA 2024: (1700+700+400)×1.12 = 3,136 → 3,100
     opexRate: 0.05,
     capacityFactor: 0.85,
     energyConsumption: 43,     // 37은 열통합 이상적 조건, 현실적 값은 42~45

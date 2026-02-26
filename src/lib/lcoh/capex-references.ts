@@ -165,9 +165,9 @@ export const SOEC_CAPEX_REFS: ElectrolyzerCapexRef[] = [
     labelEn: 'IEA 2024',
     source: 'IEA Global Hydrogen Review 2024',
     year: 2024,
-    totalCapex: 2800,
-    totalCapexLow: 1800,
-    totalCapexHigh: 3800,
+    totalCapex: 3100,          // (1700+700+400) × 1.12 = 3,136 → 3,100 반올림
+    totalCapexLow: 2000,
+    totalCapexHigh: 4200,
     electrolyzerSystem: 1700,
     bop: 700,
     epc: 400,
@@ -179,7 +179,7 @@ export const SOEC_CAPEX_REFS: ElectrolyzerCapexRef[] = [
     labelEn: 'Custom',
     source: '',
     year: 2024,
-    totalCapex: 2800,
+    totalCapex: 3100,
   },
 ]
 

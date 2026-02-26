@@ -131,11 +131,18 @@ export default function CapexBreakdown({ pathway, capex, onCapexChange, lang }: 
             </option>
           ))}
         </select>
-        {selectedRefObj && selectedRefObj.totalCapexLow && selectedRefObj.totalCapexHigh && (
-          <span className="text-xs text-gray-400">
-            {selectedRefObj.totalCapexLow}~{selectedRefObj.totalCapexHigh} $/kW
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {selectedRefObj && selectedRefObj.totalCapexLow && selectedRefObj.totalCapexHigh && (
+            <span className="text-xs text-gray-400">
+              {selectedRefObj.totalCapexLow}~{selectedRefObj.totalCapexHigh} $/kW
+            </span>
+          )}
+          {selectedRefObj && selectedRefObj.source && selectedRefObj.id !== 'custom' && (
+            <span className="text-xs text-gray-400 italic truncate max-w-[160px]" title={selectedRefObj.source}>
+              {selectedRefObj.source}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Level 0 입력 */}
@@ -144,12 +151,24 @@ export default function CapexBreakdown({ pathway, capex, onCapexChange, lang }: 
         value={capex}
         step={50}
         min={100}
+        readOnly={expanded}
         onChange={(e) => {
-          onCapexChange(parseFloat(e.target.value) || 0)
-          setSelectedRefId('custom')
+          if (!expanded) {
+            onCapexChange(parseFloat(e.target.value) || 0)
+            setSelectedRefId('custom')
+          }
         }}
-        className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className={`w-full border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 ${
+          expanded
+            ? 'border-gray-200 bg-gray-50 text-gray-500 focus:ring-gray-300 cursor-not-allowed'
+            : 'border-gray-300 focus:ring-blue-500'
+        }`}
       />
+      {expanded && (
+        <p className="text-xs text-blue-600 mt-0.5">
+          {lang === 'ko' ? '※ 항목 합산값 자동 반영' : '※ Auto-calculated from breakdown'}
+        </p>
+      )}
 
       {/* Level 1 펼치기 버튼 */}
       <button
@@ -191,7 +210,7 @@ export default function CapexBreakdown({ pathway, capex, onCapexChange, lang }: 
                 hint="$/kW"
               />
               <MiniInput
-                label={lang === 'ko' ? 'BOS (전력변환·제어)' : 'BOS (Power Conv.+Control)'}
+                label={lang === 'ko' ? '스택 BOS (정류기·펌프·제어)' : 'Stack BOS (Rectifier, Pump, Control)'}
                 value={breakdown.bos}
                 onChange={(v) => handleL2Change('bos', v)}
                 hint="$/kW"
