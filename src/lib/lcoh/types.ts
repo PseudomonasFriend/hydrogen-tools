@@ -45,6 +45,9 @@ export interface StackReplacement {
 export interface Tier2ExtraParams {
   wacc: number                         // fraction (0.08 = 8%)
   stackReplacement?: StackReplacement  // 전해조 전용
+  electricityEscalation: number        // 전기료 연간 상승률 (%), 기본값 2
+  gasEscalation: number                // 가스/석탄료 연간 상승률 (%), 기본값 2
+  opexEscalation: number               // O&M 연간 상승률 (%), 기본값 2
 }
 
 export interface Tier2Result {
@@ -110,4 +113,9 @@ export interface Tier3Result {
     irr: number
     paybackYear: number | null
   }[]
+}
+
+export interface BreakEvenResult {
+  breakEvenPrice: number    // NPV=0이 되는 최소 H₂ 판매가 ($/kg)
+  margin: number            // 현재 판매가 - break-even 가격 (양수면 수익, 음수면 손실)
 }
