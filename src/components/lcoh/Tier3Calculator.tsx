@@ -259,7 +259,7 @@ export default function Tier3Calculator({ t }: Props) {
           {/* NPV 곡선 */}
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <h2 className="text-sm font-medium text-gray-600 mb-4">{t.lcoh3.npvChart}</h2>
-            <NpvChart cashFlows={result.cashFlows} t={t} />
+            <NpvChart cashFlows={result.cashFlows} t={t} paybackYear={result.paybackYear} />
           </div>
 
           {/* 현금흐름 테이블 */}

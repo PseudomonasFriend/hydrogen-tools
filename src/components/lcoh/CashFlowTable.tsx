@@ -14,6 +14,12 @@ function fmt(n: number): string {
   return `$${n.toFixed(0)}`
 }
 
+// 0 또는 음수에 가까운 값은 '-' 로 표시 (스택 교체비 등 대부분 연도 0인 경우 가독성)
+function fmtOrDash(n: number): string {
+  if (n === 0) return '-'
+  return fmt(n)
+}
+
 export default function CashFlowTable({ cashFlows, t }: Props) {
   return (
     <div className="overflow-x-auto">
@@ -24,6 +30,9 @@ export default function CashFlowTable({ cashFlows, t }: Props) {
             <th className="py-2 px-2 text-right font-medium">{t.lcoh3.revenue}</th>
             <th className="py-2 px-2 text-right font-medium">{t.lcoh3.opex}</th>
             <th className="py-2 px-2 text-right font-medium">{t.lcoh3.fuel}</th>
+            <th className="py-2 px-2 text-right font-medium">{t.lcoh3.stackRepl}</th>
+            <th className="py-2 px-2 text-right font-medium">{t.lcoh3.depreciation}</th>
+            <th className="py-2 px-2 text-right font-medium">{t.lcoh3.taxableIncome}</th>
             <th className="py-2 px-2 text-right font-medium">{t.lcoh3.tax}</th>
             <th className="py-2 px-2 text-right font-medium">{t.lcoh3.netCashFlow}</th>
             <th className="py-2 px-2 text-right font-medium">{t.lcoh3.cumulativeCF}</th>
@@ -40,6 +49,9 @@ export default function CashFlowTable({ cashFlows, t }: Props) {
               <td className="py-1.5 px-2 text-right text-gray-600">{row.year === 0 ? '-' : fmt(row.revenue)}</td>
               <td className="py-1.5 px-2 text-right text-gray-600">{row.year === 0 ? '-' : fmt(row.opex)}</td>
               <td className="py-1.5 px-2 text-right text-gray-600">{row.year === 0 ? '-' : fmt(row.fuel)}</td>
+              <td className="py-1.5 px-2 text-right text-gray-600">{row.year === 0 ? '-' : fmtOrDash(row.stackRepl)}</td>
+              <td className="py-1.5 px-2 text-right text-gray-600">{row.year === 0 ? '-' : fmtOrDash(row.depreciation)}</td>
+              <td className="py-1.5 px-2 text-right text-gray-600">{row.year === 0 ? '-' : fmt(row.taxableIncome)}</td>
               <td className="py-1.5 px-2 text-right text-gray-600">{row.year === 0 ? '-' : fmt(row.tax)}</td>
               <td className={`py-1.5 px-2 text-right font-medium ${row.netCashFlow >= 0 ? 'text-green-700' : 'text-red-600'}`}>
                 {fmt(row.netCashFlow)}

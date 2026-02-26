@@ -17,6 +17,7 @@ import type { Translations } from '@/lib/i18n/ko'
 interface Props {
   cashFlows: CashFlowRow[]
   t: Translations
+  paybackYear?: number | null
 }
 
 function fmtAxis(n: number): string {
@@ -25,12 +26,17 @@ function fmtAxis(n: number): string {
   return `$${n.toFixed(0)}`
 }
 
-export default function NpvChart({ cashFlows, t }: Props) {
+export default function NpvChart({ cashFlows, t, paybackYear }: Props) {
   const data = cashFlows.map((row) => ({
     year: row.year,
     [t.lcoh3.cumulativeCF]: Math.round(row.cumulativeCF),
     [t.lcoh3.cumulativePV]: Math.round(row.cumulativePV),
   }))
+
+  // cashFlows 마지막 연도(수명)를 기준으로 paybackYear 유효성 검증
+  const lifetime = cashFlows.length > 0 ? cashFlows[cashFlows.length - 1].year : 0
+  const showPaybackLine =
+    paybackYear != null && paybackYear > 0 && paybackYear < lifetime
 
   return (
     <ResponsiveContainer width="100%" height={320}>
@@ -52,6 +58,14 @@ export default function NpvChart({ cashFlows, t }: Props) {
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
         <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="3 3" />
+        {showPaybackLine && (
+          <ReferenceLine
+            x={paybackYear}
+            stroke="#10b981"
+            strokeDasharray="4 2"
+            label={{ value: `Year ${paybackYear}`, position: 'top', fontSize: 11, fill: '#10b981' }}
+          />
+        )}
         <Line
           type="monotone"
           dataKey={t.lcoh3.cumulativeCF}
