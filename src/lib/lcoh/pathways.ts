@@ -34,13 +34,13 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
     capex: 2800,               // IEA 2024: 여전히 고가
     opexRate: 0.05,
     capacityFactor: 0.85,
-    energyConsumption: 37,     // IEA 84% LHV 효율 반영
+    energyConsumption: 43,     // 37은 열통합 이상적 조건, 현실적 값은 42~45
     electricityCost: 0.04,
     lifetime: 10,
   },
   smr: {
     plantCapacity: 100,
-    capexPerTpd: 5_500_000,    // 규제 강화 반영
+    capexPerTpd: 7_000_000,    // TIC 기준 현실 범위 $7~10M
     opexRate: 0.04,
     capacityFactor: 0.90,
     naturalGasCostPerKgH2: 1.2, // 2024 가스가격 하향
@@ -48,7 +48,7 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
   },
   smr_ccs: {
     plantCapacity: 100,
-    capexPerTpd: 9_000_000,    // CCS 설비비 상승
+    capexPerTpd: 10_000_000,   // CCS 설비비 상승
     opexRate: 0.045,
     capacityFactor: 0.90,
     naturalGasCostPerKgH2: 1.2,
@@ -57,7 +57,7 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
   },
   atr_ccs: {
     plantCapacity: 100,
-    capexPerTpd: 8_000_000,    // ATR+CCS 설비비
+    capexPerTpd: 9_500_000,    // ATR+CCS 설비비
     opexRate: 0.04,
     capacityFactor: 0.90,
     naturalGasCostPerKgH2: 1.2,
@@ -91,14 +91,14 @@ export const PATHWAY_COLORS: Record<PathwayId, PathwayColor> = {
 export const PATHWAY_ORDER: PathwayId[] = ['pem', 'alk', 'aem', 'soec', 'smr', 'smr_ccs', 'atr_ccs', 'coal']
 
 export const DEFAULT_T2_EXTRA: Record<PathwayId, Tier2ExtraParams> = {
-  pem:     { wacc: 0.08, stackReplacement: { costRate: 0.25, interval: 8 } },
-  alk:     { wacc: 0.08, stackReplacement: { costRate: 0.15, interval: 12 } },
-  aem:     { wacc: 0.08, stackReplacement: { costRate: 0.25, interval: 7 } },
-  soec:    { wacc: 0.08, stackReplacement: { costRate: 0.35, interval: 6 } },
-  smr:     { wacc: 0.08 },
-  smr_ccs: { wacc: 0.08 },
-  atr_ccs: { wacc: 0.08 },
-  coal:    { wacc: 0.08 },
+  pem:     { wacc: 0.08, stackReplacement: { costRate: 0.25, interval: 8 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
+  alk:     { wacc: 0.08, stackReplacement: { costRate: 0.15, interval: 12 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
+  aem:     { wacc: 0.08, stackReplacement: { costRate: 0.25, interval: 7 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
+  soec:    { wacc: 0.08, stackReplacement: { costRate: 0.45, interval: 5 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
+  smr:     { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
+  smr_ccs: { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
+  atr_ccs: { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
+  coal:    { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
 }
 
 // Tier 3 추가 파라미터 기본값
