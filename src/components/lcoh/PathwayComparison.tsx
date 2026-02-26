@@ -85,7 +85,7 @@ export default function PathwayComparison({ t, lang }: Props) {
           <label className="block text-xs font-medium text-gray-600 mb-1">
             {lang === 'ko' ? '천연가스 ($/kg H₂)' : 'Natural Gas ($/kg H₂)'}
           </label>
-          <p className="text-xs text-gray-400 mb-1">※ $/MMBtu × 0.12 ≈ $/kg H₂</p>
+          <p className="text-xs text-gray-400 mb-1">※ $/MMBtu × 0.20 ≈ $/kg H₂</p>
           <input
             type="number"
             value={naturalGasCost}

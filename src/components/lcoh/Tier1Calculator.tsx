@@ -183,7 +183,7 @@ export default function Tier1Calculator({ t, lang }: Props) {
                   step={0.1}
                   error={fieldError('naturalGasCostPerKgH2')}
                 />
-                <p className="text-xs text-gray-400 mt-1">※ $/MMBtu × 0.12 ≈ $/kg H₂</p>
+                <p className="text-xs text-gray-400 mt-1">※ $/MMBtu × 0.20 ≈ $/kg H₂</p>
               </div>
               {(pathway === 'smr_ccs' || pathway === 'atr_ccs') && (
                 <NumInput
