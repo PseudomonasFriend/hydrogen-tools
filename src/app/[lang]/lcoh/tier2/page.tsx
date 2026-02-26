@@ -15,7 +15,7 @@ export default async function Tier2Page({ params }: { params: Promise<{ lang: st
         <h1 className="text-2xl font-bold text-gray-900">{t.lcoh2.title}</h1>
         <p className="text-sm text-gray-500 mt-1">{t.lcoh2.subtitle}</p>
       </div>
-      <Tier2Calculator t={t} />
+      <Tier2Calculator t={t} lang={lang as Lang} />
     </div>
   )
 }

@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { PathwayId, ElectrolyzerParams, SmrParams, Tier2ExtraParams, Tier2Result, SensitivityPoint } from '@/lib/lcoh/types'
+import type { Lang } from '@/lib/lcoh/types'
 import type { Translations } from '@/lib/i18n/ko'
 import { DEFAULT_PARAMS, DEFAULT_T2_EXTRA } from '@/lib/lcoh/pathways'
 import { calcElectrolyzerLCOH_T2, calcSmrLCOH_T2, calcSensitivity } from '@/lib/lcoh/calculations'
+import { useLcohStorage } from '@/hooks/useLcohStorage'
 import PathwaySelector from './PathwaySelector'
 import ResultChart from './ResultChart'
 import TornadoChart from './TornadoChart'
@@ -17,6 +19,7 @@ function isSmrPathway(id: PathwayId): boolean {
 
 interface Props {
   t: Translations
+  lang: Lang
 }
 
 export default function Tier2Calculator({ t }: Props) {
@@ -26,10 +29,23 @@ export default function Tier2Calculator({ t }: Props) {
   const [result, setResult] = useState<Tier2Result | null>(null)
   const [sensitivities, setSensitivities] = useState<SensitivityPoint[]>([])
 
+  const storage = useLcohStorage()
+
+  // 초기 로드 (경로 + 파라미터 + t2Params)
+  useEffect(() => {
+    const savedPathway = storage.loadPathway()
+    if (savedPathway) {
+      setPathway(savedPathway)
+      setParams(storage.loadParams(savedPathway, DEFAULT_PARAMS[savedPathway]))
+      setT2Params(storage.loadT2(savedPathway, DEFAULT_T2_EXTRA[savedPathway]))
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handlePathwayChange = (id: PathwayId) => {
+    storage.savePathway(id)
     setPathway(id)
-    setParams(DEFAULT_PARAMS[id])
-    setT2Params(DEFAULT_T2_EXTRA[id])
+    setParams(storage.loadParams(id, DEFAULT_PARAMS[id]))
+    setT2Params(storage.loadT2(id, DEFAULT_T2_EXTRA[id]))
     setResult(null)
     setSensitivities([])
   }
@@ -46,6 +62,9 @@ export default function Tier2Calculator({ t }: Props) {
     const res = smr
       ? calcSmrLCOH_T2(params as SmrParams, t2Params)
       : calcElectrolyzerLCOH_T2(params as ElectrolyzerParams, t2Params)
+    // 계산 성공 전 저장
+    storage.saveParams(pathway, params)
+    storage.saveT2(pathway, t2Params)
     setResult(res)
     setSensitivities(calcSensitivity(params, t2Params, smr))
   }
@@ -54,7 +73,8 @@ export default function Tier2Calculator({ t }: Props) {
     setParams((prev) => ({ ...prev, [key]: value }))
   }
 
-  const setT2Field = (key: string, value: number) => {
+  // 실제 Tier2ExtraParams 키 + 스택 교체 전용 가상 키 처리
+  const setT2Field = (key: keyof Tier2ExtraParams | 'stackReplCostRate' | 'stackReplInterval', value: number) => {
     if (key === 'stackReplCostRate' || key === 'stackReplInterval') {
       setT2Params((prev) => ({
         ...prev,
@@ -161,6 +181,36 @@ export default function Tier2Calculator({ t }: Props) {
                   />
                 </>
               )}
+              {/* 인플레이션 / 에스컬레이션 입력 */}
+              <NumInput
+                label={t.lcoh2.electricityEscalation}
+                value={t2Params.electricityEscalation}
+                onChange={(v) => setT2Field('electricityEscalation', v)}
+                step={0.5}
+                min={-5}
+                max={15}
+                unit={t.lcoh2.escalationUnit}
+              />
+              {isSmr ? (
+                <NumInput
+                  label={t.lcoh2.gasEscalation}
+                  value={t2Params.gasEscalation}
+                  onChange={(v) => setT2Field('gasEscalation', v)}
+                  step={0.5}
+                  min={-5}
+                  max={15}
+                  unit={t.lcoh2.escalationUnit}
+                />
+              ) : null}
+              <NumInput
+                label={t.lcoh2.opexEscalation}
+                value={t2Params.opexEscalation}
+                onChange={(v) => setT2Field('opexEscalation', v)}
+                step={0.5}
+                min={-5}
+                max={15}
+                unit={t.lcoh2.escalationUnit}
+              />
             </div>
           </div>
         </div>
@@ -234,6 +284,7 @@ function NumInput({
   step = 1,
   min,
   max,
+  unit,
 }: {
   label: string
   value: number
@@ -241,19 +292,23 @@ function NumInput({
   step?: number
   min?: number
   max?: number
+  unit?: string
 }) {
   return (
     <div>
       <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
-      <input
-        type="number"
-        value={value}
-        step={step}
-        min={min}
-        max={max}
-        onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-        className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
+      <div className="flex items-center gap-1">
+        <input
+          type="number"
+          value={value}
+          step={step}
+          min={min}
+          max={max}
+          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        {unit && <span className="text-xs text-gray-400 whitespace-nowrap">{unit}</span>}
+      </div>
     </div>
   )
 }
