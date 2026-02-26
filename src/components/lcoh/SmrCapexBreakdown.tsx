@@ -201,12 +201,14 @@ export default function SmrCapexBreakdown({ pathway, capexPerTpd, onCapexChange,
             value={breakdown.reformer}
             onChange={(v) => handleL1Change('reformer', v)}
             hint="$/tpd"
+            step={100000}
           />
           <MiniInput
             label={lang === 'ko' ? '가스 정제 (Gas Cleanup / PSA)' : 'Gas Cleanup / PSA'}
             value={breakdown.gasCleanup}
             onChange={(v) => handleL1Change('gasCleanup', v)}
             hint="$/tpd"
+            step={100000}
           />
           {isCcs && (
             <MiniInput
@@ -214,6 +216,7 @@ export default function SmrCapexBreakdown({ pathway, capexPerTpd, onCapexChange,
               value={breakdown.ccs}
               onChange={(v) => handleL1Change('ccs', v)}
               hint="$/tpd"
+              step={100000}
             />
           )}
           <MiniInput
@@ -221,12 +224,14 @@ export default function SmrCapexBreakdown({ pathway, capexPerTpd, onCapexChange,
             value={breakdown.utilities}
             onChange={(v) => handleL1Change('utilities', v)}
             hint="$/tpd"
+            step={100000}
           />
           <MiniInput
             label={lang === 'ko' ? 'EPC (설계·시공·시운전)' : 'EPC (Engineering, Construction)'}
             value={breakdown.epc}
             onChange={(v) => handleL1Change('epc', v)}
             hint="$/tpd"
+            step={100000}
           />
 
           {/* 합계 표시 */}
@@ -241,28 +246,29 @@ export default function SmrCapexBreakdown({ pathway, capexPerTpd, onCapexChange,
 }
 
 function MiniInput({
-  label,
-  value,
-  onChange,
-  hint,
+  label, value, onChange, hint, step = 10, highlight = false,
 }: {
   label: string
   value: number
   onChange: (v: number) => void
   hint: string
+  step?: number
+  highlight?: boolean
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <label className="text-xs flex-1 text-gray-600">{label}</label>
+    <div className="space-y-0.5">
+      <label className={`block text-xs leading-snug ${highlight ? 'text-green-700 font-medium' : 'text-gray-600'}`}>
+        {label}
+      </label>
       <div className="flex items-center gap-1">
         <input
           type="number"
           value={value}
-          step={100000}
+          step={step}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-          className="w-28 border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="flex-1 min-w-0 border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
-        <span className="text-xs text-gray-400 w-10">{hint}</span>
+        <span className="text-xs text-gray-400 shrink-0 w-8">{hint}</span>
       </div>
     </div>
   )

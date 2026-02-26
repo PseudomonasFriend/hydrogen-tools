@@ -261,12 +261,7 @@ export default function CapexBreakdown({ pathway, capex, onCapexChange, lang }: 
 }
 
 function MiniInput({
-  label,
-  value,
-  onChange,
-  hint,
-  step = 10,
-  highlight = false,
+  label, value, onChange, hint, step = 10, highlight = false,
 }: {
   label: string
   value: number
@@ -276,8 +271,8 @@ function MiniInput({
   highlight?: boolean
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <label className={`text-xs flex-1 ${highlight ? 'text-green-700 font-medium' : 'text-gray-600'}`}>
+    <div className="space-y-0.5">
+      <label className={`block text-xs leading-snug ${highlight ? 'text-green-700 font-medium' : 'text-gray-600'}`}>
         {label}
       </label>
       <div className="flex items-center gap-1">
@@ -286,9 +281,9 @@ function MiniInput({
           value={value}
           step={step}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-          className="w-24 border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="flex-1 min-w-0 border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
-        <span className="text-xs text-gray-400 w-8">{hint}</span>
+        <span className="text-xs text-gray-400 shrink-0 w-8">{hint}</span>
       </div>
     </div>
   )

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { PathwayId, ElectrolyzerParams, SmrParams, Tier2ExtraParams, Tier2Result, SensitivityPoint } from '@/lib/lcoh/types'
 import type { Lang } from '@/lib/lcoh/types'
 import type { Translations } from '@/lib/i18n/ko'
@@ -58,6 +58,7 @@ export default function Tier2Calculator({ t, lang }: Props) {
 
   const storage = useLcohStorage()
   const currencyCtx = useCurrency()
+  const resultRef = useRef<HTMLDivElement>(null)
 
   const handlePathwayChange = (id: PathwayId) => {
     storage.savePathway(id)
@@ -85,6 +86,7 @@ export default function Tier2Calculator({ t, lang }: Props) {
     storage.saveT2(pathway, t2Params)
     setResult(res)
     setSensitivities(calcSensitivity(params, t2Params, smr))
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
   }
 
   const setField = (key: string, value: number) => {
@@ -136,7 +138,7 @@ export default function Tier2Calculator({ t, lang }: Props) {
       {/* 파라미터 입력 */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium text-gray-600">{t.lcoh.params}</h2>
+          <h2 className="text-sm font-semibold text-gray-700">{t.lcoh.params}</h2>
           <button onClick={handleReset} className="text-xs text-blue-600 hover:text-blue-800 underline">
             {t.lcoh.resetDefaults}
           </button>
@@ -150,7 +152,7 @@ export default function Tier2Calculator({ t, lang }: Props) {
               {isSmr ? (
                 <>
                   <NumInput label={t.lcoh.plantCapacity} value={(params as SmrParams).plantCapacity} onChange={(v) => setField('plantCapacity', v)} step={10} />
-                  <div>
+                  <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">{t.lcoh.capexPerTpd}</label>
                     <SmrCapexBreakdown
                       pathway={pathway}
@@ -177,30 +179,32 @@ export default function Tier2Calculator({ t, lang }: Props) {
               ) : (
                 <>
                   {/* 입력 기준 토글 */}
-                  <div className="col-span-2 mb-1">
-                    <span className="text-xs font-medium text-gray-600 mr-2">{t.lcoh.capacityMode}:</span>
-                    <button
-                      type="button"
-                      onClick={() => setCapacityMode('system')}
-                      className={`text-xs px-3 py-1 rounded-full mr-1 transition-colors ${
-                        capacityMode === 'system'
-                          ? 'bg-blue-600 text-white'
-                          : 'border border-gray-300 text-gray-600 hover:bg-blue-50'
-                      }`}
-                    >
-                      {t.lcoh.capacityModeSystem}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCapacityMode('production')}
-                      className={`text-xs px-3 py-1 rounded-full transition-colors ${
-                        capacityMode === 'production'
-                          ? 'bg-blue-600 text-white'
-                          : 'border border-gray-300 text-gray-600 hover:bg-blue-50'
-                      }`}
-                    >
-                      {t.lcoh.capacityModeProduction}
-                    </button>
+                  <div className="col-span-2 flex items-center gap-3 mb-1">
+                    <span className="text-xs font-medium text-gray-500">{t.lcoh.capacityMode}:</span>
+                    <div className="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 gap-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setCapacityMode('system')}
+                        className={`text-xs px-3 py-1 rounded-md transition-colors ${
+                          capacityMode === 'system'
+                            ? 'bg-white text-blue-700 font-medium shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        {t.lcoh.capacityModeSystem}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCapacityMode('production')}
+                        className={`text-xs px-3 py-1 rounded-md transition-colors ${
+                          capacityMode === 'production'
+                            ? 'bg-white text-blue-700 font-medium shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        {t.lcoh.capacityModeProduction}
+                      </button>
+                    </div>
                   </div>
 
                   {/* 모드별 첫 번째 입력 */}
@@ -236,7 +240,7 @@ export default function Tier2Calculator({ t, lang }: Props) {
                     </div>
                   )}
 
-                  <div>
+                  <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">{t.lcoh.capex}</label>
                     <CapexBreakdown
                       pathway={pathway}
@@ -346,9 +350,11 @@ export default function Tier2Calculator({ t, lang }: Props) {
       {result && (
         <>
           {/* Tier 1 vs Tier 2 비교 */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-medium text-gray-600">{t.lcoh.result}</h2>
+          <div ref={resultRef} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-semibold text-gray-700">{t.lcoh.result}</h2>
+            </div>
+            <div className="mb-4 pb-3 border-b border-gray-100">
               <CurrencySelector {...currencyCtx} />
             </div>
 
