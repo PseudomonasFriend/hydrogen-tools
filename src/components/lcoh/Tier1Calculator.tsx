@@ -1,10 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { PathwayId, ElectrolyzerParams, SmrParams, Tier1Result } from '@/lib/lcoh/types'
+import { isSmrParams } from '@/lib/lcoh/types'
+import type { Lang } from '@/lib/lcoh/types'
 import type { Translations } from '@/lib/i18n/ko'
 import { DEFAULT_PARAMS } from '@/lib/lcoh/pathways'
 import { calcElectrolyzerLCOH, calcSmrLCOH } from '@/lib/lcoh/calculations'
+import { REGIONAL_PRESETS } from '@/lib/lcoh/presets'
+import type { RegionalPreset } from '@/lib/lcoh/presets'
+import { validateElectrolyzerParams, validateSmrParams } from '@/lib/lcoh/validation'
+import type { ValidationError } from '@/lib/lcoh/validation'
+import { useLcohStorage } from '@/hooks/useLcohStorage'
 import PathwaySelector from './PathwaySelector'
 import ResultChart from './ResultChart'
 
@@ -16,25 +23,66 @@ function isSmrPathway(id: PathwayId): boolean {
 
 interface Props {
   t: Translations
+  lang: Lang
 }
 
-export default function Tier1Calculator({ t }: Props) {
+export default function Tier1Calculator({ t, lang }: Props) {
   const [pathway, setPathway] = useState<PathwayId>('pem')
   const [params, setParams] = useState<ElectrolyzerParams | SmrParams>(DEFAULT_PARAMS['pem'] as ElectrolyzerParams)
   const [result, setResult] = useState<Tier1Result | null>(null)
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
 
-  const handlePathwayChange = (id: PathwayId) => {
-    setPathway(id)
-    setParams(DEFAULT_PARAMS[id])
+  const storage = useLcohStorage()
+
+  // 초기 로드 (경로 + 파라미터)
+  useEffect(() => {
+    const savedPathway = storage.loadPathway()
+    if (savedPathway) {
+      setPathway(savedPathway)
+      setParams(storage.loadParams(savedPathway, DEFAULT_PARAMS[savedPathway]))
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handlePathwayChange = (newPathway: PathwayId) => {
+    storage.savePathway(newPathway)
+    setPathway(newPathway)
+    setParams(storage.loadParams(newPathway, DEFAULT_PARAMS[newPathway]))
     setResult(null)
+    setValidationErrors([])
   }
 
   const handleReset = () => {
     setParams(DEFAULT_PARAMS[pathway])
     setResult(null)
+    setValidationErrors([])
+  }
+
+  function handlePresetSelect(preset: RegionalPreset) {
+    if (isSmrPathway(pathway)) {
+      if (pathway === 'coal') {
+        setParams((prev) => ({ ...prev, coalCostPerKgH2: preset.coalCost }))
+      } else {
+        setParams((prev) => ({ ...prev, naturalGasCostPerKgH2: preset.naturalGasCost }))
+      }
+    } else {
+      setParams((prev) => ({ ...prev, electricityCost: preset.electricityCost }))
+    }
   }
 
   const handleCalculate = () => {
+    const errors = isSmrParams(params)
+      ? validateSmrParams(params)
+      : validateElectrolyzerParams(params as ElectrolyzerParams)
+
+    if (errors.length > 0) {
+      setValidationErrors(errors)
+      return
+    }
+    setValidationErrors([])
+
+    // 계산 성공 전 저장
+    storage.saveParams(pathway, params)
+
     if (isSmrPathway(pathway)) {
       setResult(calcSmrLCOH(params as SmrParams))
     } else {
@@ -46,12 +94,31 @@ export default function Tier1Calculator({ t }: Props) {
     setParams((prev) => ({ ...prev, [key]: value }))
   }
 
+  // 에러 있는 필드 확인 헬퍼
+  const fieldError = (field: string) =>
+    validationErrors.find((e) => e.field === field)?.message
+
   const isSmr = isSmrPathway(pathway)
 
   return (
     <div className="space-y-6">
       {/* 경로 선택 */}
       <PathwaySelector selected={pathway} onChange={handlePathwayChange} t={t} />
+
+      {/* 지역 프리셋 */}
+      <div className="flex flex-wrap gap-2 mb-4 items-center">
+        <span className="text-sm text-gray-500">{t.lcoh2.regionalPreset}:</span>
+        {REGIONAL_PRESETS.map((preset) => (
+          <button
+            key={preset.id}
+            type="button"
+            onClick={() => handlePresetSelect(preset)}
+            className="px-3 py-1 text-xs border border-gray-300 rounded-full hover:bg-blue-50 hover:border-blue-400 transition-colors"
+          >
+            {lang === 'ko' ? preset.labelKo : preset.labelEn}
+          </button>
+        ))}
+      </div>
 
       {/* 파라미터 입력 */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
@@ -74,12 +141,14 @@ export default function Tier1Calculator({ t }: Props) {
                 value={(params as SmrParams).plantCapacity}
                 onChange={(v) => setField('plantCapacity', v)}
                 step={10}
+                error={fieldError('plantCapacity')}
               />
               <NumInput
                 label={t.lcoh.capexPerTpd}
                 value={(params as SmrParams).capexPerTpd}
                 onChange={(v) => setField('capexPerTpd', v)}
                 step={100000}
+                error={fieldError('capexPerTpd')}
               />
               <NumInput
                 label={t.lcoh.opexRate}
@@ -88,6 +157,7 @@ export default function Tier1Calculator({ t }: Props) {
                 step={0.5}
                 min={0}
                 max={20}
+                error={fieldError('opexRate')}
               />
               <NumInput
                 label={t.lcoh.capacityFactor}
@@ -96,12 +166,14 @@ export default function Tier1Calculator({ t }: Props) {
                 step={1}
                 min={0}
                 max={100}
+                error={fieldError('capacityFactor')}
               />
               <NumInput
                 label={t.lcoh.naturalGasCost}
                 value={(params as SmrParams).naturalGasCostPerKgH2}
                 onChange={(v) => setField('naturalGasCostPerKgH2', v)}
                 step={0.1}
+                error={fieldError('naturalGasCostPerKgH2')}
               />
               {(pathway === 'smr_ccs' || pathway === 'atr_ccs') && (
                 <NumInput
@@ -109,6 +181,7 @@ export default function Tier1Calculator({ t }: Props) {
                   value={(params as SmrParams).ccsCostPerKgH2 ?? 0}
                   onChange={(v) => setField('ccsCostPerKgH2', v)}
                   step={0.1}
+                  error={fieldError('ccsCostPerKgH2')}
                 />
               )}
               {pathway === 'coal' && (
@@ -117,6 +190,7 @@ export default function Tier1Calculator({ t }: Props) {
                   value={(params as SmrParams).coalCostPerKgH2 ?? 0}
                   onChange={(v) => setField('coalCostPerKgH2', v)}
                   step={0.05}
+                  error={fieldError('coalCostPerKgH2')}
                 />
               )}
               <NumInput
@@ -126,6 +200,7 @@ export default function Tier1Calculator({ t }: Props) {
                 step={1}
                 min={5}
                 max={40}
+                error={fieldError('lifetime')}
               />
             </>
           ) : (
@@ -136,12 +211,14 @@ export default function Tier1Calculator({ t }: Props) {
                 value={(params as ElectrolyzerParams).systemCapacity}
                 onChange={(v) => setField('systemCapacity', v)}
                 step={100}
+                error={fieldError('systemCapacity')}
               />
               <NumInput
                 label={t.lcoh.capex}
                 value={(params as ElectrolyzerParams).capex}
                 onChange={(v) => setField('capex', v)}
                 step={50}
+                error={fieldError('capex')}
               />
               <NumInput
                 label={t.lcoh.opexRate}
@@ -150,6 +227,7 @@ export default function Tier1Calculator({ t }: Props) {
                 step={0.5}
                 min={0}
                 max={20}
+                error={fieldError('opexRate')}
               />
               <NumInput
                 label={t.lcoh.capacityFactor}
@@ -158,18 +236,21 @@ export default function Tier1Calculator({ t }: Props) {
                 step={1}
                 min={0}
                 max={100}
+                error={fieldError('capacityFactor')}
               />
               <NumInput
                 label={t.lcoh.energyConsumption}
                 value={(params as ElectrolyzerParams).energyConsumption}
                 onChange={(v) => setField('energyConsumption', v)}
                 step={1}
+                error={fieldError('energyConsumption')}
               />
               <NumInput
                 label={t.lcoh.electricityCost}
                 value={(params as ElectrolyzerParams).electricityCost}
                 onChange={(v) => setField('electricityCost', v)}
                 step={0.01}
+                error={fieldError('electricityCost')}
               />
               <NumInput
                 label={t.lcoh.lifetime}
@@ -178,6 +259,7 @@ export default function Tier1Calculator({ t }: Props) {
                 step={1}
                 min={5}
                 max={40}
+                error={fieldError('lifetime')}
               />
             </>
           )}
@@ -233,6 +315,7 @@ function NumInput({
   step = 1,
   min,
   max,
+  error,
 }: {
   label: string
   value: number
@@ -240,6 +323,7 @@ function NumInput({
   step?: number
   min?: number
   max?: number
+  error?: string
 }) {
   return (
     <div>
@@ -251,8 +335,13 @@ function NumInput({
         min={min}
         max={max}
         onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-        className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className={`w-full border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 ${
+          error
+            ? 'border-red-400 focus:ring-red-400'
+            : 'border-gray-300 focus:ring-blue-500'
+        }`}
       />
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   )
 }

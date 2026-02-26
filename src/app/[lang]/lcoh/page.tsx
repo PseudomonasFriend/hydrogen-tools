@@ -15,7 +15,7 @@ export default async function LcohPage({ params }: { params: Promise<{ lang: str
         <h1 className="text-2xl font-bold text-gray-900">{t.lcoh.title}</h1>
         <p className="text-sm text-gray-500 mt-1">{t.lcoh.subtitle}</p>
       </div>
-      <Tier1Calculator t={t} />
+      <Tier1Calculator t={t} lang={lang as Lang} />
     </div>
   )
 }
