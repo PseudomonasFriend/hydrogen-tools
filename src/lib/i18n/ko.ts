@@ -79,6 +79,7 @@ export const ko = {
  tier1Tab: 'Tier 1 — 단순',
  tier2Tab: 'Tier 2 — 할인율',
  tier3Tab: 'Tier 3 — 풀 모델',
+ co2Price: '탄소 비용 ($/tonne CO₂)',
  },
   lcoh3: {
  title: 'LCOH 계산기 (Tier 3)',
@@ -119,6 +120,7 @@ export const ko = {
  breakEvenNegative: '▼ 판매가 부족',
  constructionNote: '건설기간이 현금흐름에 반영됨',
  subsidyPerKgH2: '보조금/세액공제 ($/kg H₂)',
+ subsidyDurationYears: '보조금 적용 기간 (년)',
  },
   about: {
  title: '수소 인텔리전스 플랫폼 소개',

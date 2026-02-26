@@ -20,6 +20,7 @@ export interface SmrParams {
   ccsCostPerKgH2?: number        // $/kg H₂ (optional)
   coalCostPerKgH2?: number       // $/kg H₂ (optional)
   lifetime: number               // years
+  co2EmissionFactor?: number     // kg CO₂/kg H₂ (SMR/Coal/SMR_CCS/ATR_CCS 전용)
 }
 
 export type PathwayParams = ElectrolyzerParams | SmrParams
@@ -48,6 +49,7 @@ export interface Tier2ExtraParams {
   electricityEscalation: number        // 전기료 연간 상승률 (%), 기본값 2
   gasEscalation: number                // 가스/석탄료 연간 상승률 (%), 기본값 2
   opexEscalation: number               // O&M 연간 상승률 (%), 기본값 2
+  co2Price: number                     // $/tonne CO₂ (탄소 비용, 기본값 0)
 }
 
 export interface Tier2Result {
@@ -70,11 +72,12 @@ export interface SensitivityPoint {
 
 // Tier 3 추가 파라미터
 export interface Tier3ExtraParams {
-  h2SellingPrice: number     // $/kg H₂ (수소 판매 가격)
-  taxRate: number            // fraction (0.25 = 25%)
-  depreciationYears: number  // 감가상각 기간 (년)
-  constructionYears: number  // 건설 기간 (년)
-  subsidyPerKgH2: number     // $/kg H₂ (보조금/세액공제, 기본값 0)
+  h2SellingPrice: number       // $/kg H₂ (수소 판매 가격)
+  taxRate: number              // fraction (0.25 = 25%)
+  depreciationYears: number    // 감가상각 기간 (년)
+  constructionYears: number    // 건설 기간 (년)
+  subsidyPerKgH2: number       // $/kg H₂ (보조금/세액공제, 기본값 0)
+  subsidyDurationYears: number // 보조금 적용 연도 수 (기본 20 = lifetime 전체)
 }
 
 export type ScenarioId = 'optimistic' | 'base' | 'conservative'

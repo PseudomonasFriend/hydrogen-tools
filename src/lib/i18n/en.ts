@@ -81,6 +81,7 @@ export const en: Translations = {
     tier1Tab: 'Tier 1 — Simple',
     tier2Tab: 'Tier 2 — Discounted',
     tier3Tab: 'Tier 3 — Full Model',
+    co2Price: 'CO₂ Price ($/tonne CO₂)',
   },
   lcoh3: {
     title: 'LCOH Calculator (Tier 3)',
@@ -121,6 +122,7 @@ export const en: Translations = {
     breakEvenNegative: '▼ Below break-even',
     constructionNote: 'Construction period reflected in cash flows',
     subsidyPerKgH2: 'Subsidy / Tax Credit ($/kg H₂)',
+    subsidyDurationYears: 'Subsidy Duration (years)',
   },
   about: {
     title: 'About Hydrogen Intelligence Platform',

@@ -45,6 +45,7 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
     capacityFactor: 0.90,
     naturalGasCostPerKgH2: 1.2, // 2024 가스가격 하향
     lifetime: 25,
+    co2EmissionFactor: 9,      // kg CO₂/kg H₂, IPCC 기준
   },
   smr_ccs: {
     plantCapacity: 100,
@@ -54,15 +55,17 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
     naturalGasCostPerKgH2: 1.2,
     ccsCostPerKgH2: 0.6,      // 포집 비용 상승
     lifetime: 25,
+    co2EmissionFactor: 1.5,    // kg CO₂/kg H₂, 포집 후 잔류
   },
   atr_ccs: {
     plantCapacity: 100,
-    capexPerTpd: 9_500_000,    // ATR+CCS 설비비
+    capexPerTpd: 11_000_000,   // ATR+CCS 설비비 (ASU로 인해 SMR+CCS보다 높음)
     opexRate: 0.04,
     capacityFactor: 0.90,
     naturalGasCostPerKgH2: 1.2,
     ccsCostPerKgH2: 0.5,      // 포집 비용 상승
     lifetime: 25,
+    co2EmissionFactor: 1.0,    // kg CO₂/kg H₂, ATR 포집 효율이 더 높음
   },
   coal: {
     plantCapacity: 200,
@@ -72,6 +75,7 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
     naturalGasCostPerKgH2: 0,
     coalCostPerKgH2: 0.6,     // 2024 석탄 가격 반영
     lifetime: 30,
+    co2EmissionFactor: 25,     // kg CO₂/kg H₂, 석탄 가스화 기준
   },
 }
 
@@ -91,24 +95,24 @@ export const PATHWAY_COLORS: Record<PathwayId, PathwayColor> = {
 export const PATHWAY_ORDER: PathwayId[] = ['pem', 'alk', 'aem', 'soec', 'smr', 'smr_ccs', 'atr_ccs', 'coal']
 
 export const DEFAULT_T2_EXTRA: Record<PathwayId, Tier2ExtraParams> = {
-  pem:     { wacc: 0.08, stackReplacement: { costRate: 0.25, interval: 8 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
-  alk:     { wacc: 0.08, stackReplacement: { costRate: 0.15, interval: 12 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
-  aem:     { wacc: 0.08, stackReplacement: { costRate: 0.25, interval: 7 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
-  soec:    { wacc: 0.08, stackReplacement: { costRate: 0.30, interval: 7 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
-  smr:     { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
-  smr_ccs: { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
-  atr_ccs: { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
-  coal:    { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2 },
+  pem:     { wacc: 0.08, stackReplacement: { costRate: 0.25, interval: 8 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2, co2Price: 0 },
+  alk:     { wacc: 0.08, stackReplacement: { costRate: 0.15, interval: 12 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2, co2Price: 0 },
+  aem:     { wacc: 0.08, stackReplacement: { costRate: 0.25, interval: 7 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2, co2Price: 0 },
+  soec:    { wacc: 0.08, stackReplacement: { costRate: 0.30, interval: 7 }, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2, co2Price: 0 },
+  smr:     { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2, co2Price: 0 },
+  smr_ccs: { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2, co2Price: 0 },
+  atr_ccs: { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2, co2Price: 0 },
+  coal:    { wacc: 0.08, electricityEscalation: 2, gasEscalation: 2, opexEscalation: 2, co2Price: 0 },
 }
 
 // Tier 3 추가 파라미터 기본값
 export const DEFAULT_T3_EXTRA: Record<PathwayId, Tier3ExtraParams> = {
-  pem:     { h2SellingPrice: 5.0, taxRate: 0.25, depreciationYears: 10, constructionYears: 2, subsidyPerKgH2: 0 },
-  alk:     { h2SellingPrice: 4.5, taxRate: 0.25, depreciationYears: 12, constructionYears: 2, subsidyPerKgH2: 0 },
-  aem:     { h2SellingPrice: 5.0, taxRate: 0.25, depreciationYears: 8,  constructionYears: 2, subsidyPerKgH2: 0 },
-  soec:    { h2SellingPrice: 5.5, taxRate: 0.25, depreciationYears: 7,  constructionYears: 2, subsidyPerKgH2: 0 },
-  smr:     { h2SellingPrice: 3.0, taxRate: 0.25, depreciationYears: 15, constructionYears: 3, subsidyPerKgH2: 0 },
-  smr_ccs: { h2SellingPrice: 3.5, taxRate: 0.25, depreciationYears: 15, constructionYears: 3, subsidyPerKgH2: 0 },
-  atr_ccs: { h2SellingPrice: 3.5, taxRate: 0.25, depreciationYears: 15, constructionYears: 3, subsidyPerKgH2: 0 },
-  coal:    { h2SellingPrice: 3.0, taxRate: 0.25, depreciationYears: 15, constructionYears: 3, subsidyPerKgH2: 0 },
+  pem:     { h2SellingPrice: 5.0, taxRate: 0.25, depreciationYears: 10, constructionYears: 2, subsidyPerKgH2: 0, subsidyDurationYears: 20 },
+  alk:     { h2SellingPrice: 4.5, taxRate: 0.25, depreciationYears: 12, constructionYears: 2, subsidyPerKgH2: 0, subsidyDurationYears: 20 },
+  aem:     { h2SellingPrice: 5.0, taxRate: 0.25, depreciationYears: 8,  constructionYears: 2, subsidyPerKgH2: 0, subsidyDurationYears: 20 },
+  soec:    { h2SellingPrice: 5.5, taxRate: 0.25, depreciationYears: 7,  constructionYears: 2, subsidyPerKgH2: 0, subsidyDurationYears: 20 },
+  smr:     { h2SellingPrice: 3.0, taxRate: 0.25, depreciationYears: 15, constructionYears: 3, subsidyPerKgH2: 0, subsidyDurationYears: 0 },
+  smr_ccs: { h2SellingPrice: 3.5, taxRate: 0.25, depreciationYears: 15, constructionYears: 3, subsidyPerKgH2: 0, subsidyDurationYears: 10 },
+  atr_ccs: { h2SellingPrice: 3.5, taxRate: 0.25, depreciationYears: 15, constructionYears: 3, subsidyPerKgH2: 0, subsidyDurationYears: 10 },
+  coal:    { h2SellingPrice: 3.0, taxRate: 0.25, depreciationYears: 15, constructionYears: 3, subsidyPerKgH2: 0, subsidyDurationYears: 0 },
 }

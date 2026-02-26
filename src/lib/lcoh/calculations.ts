@@ -107,7 +107,9 @@ export function calcSmrLCOH_T2(p: SmrParams, t2: Tier2ExtraParams): Tier2Result 
   const H2_annual = p.plantCapacity * 1000 * 365 * p.capacityFactor
   const capexTotal = p.capexPerTpd * p.plantCapacity
   const opexAnnual = capexTotal * p.opexRate
-  const fuelCostPerKg = (p.naturalGasCostPerKgH2 ?? 0) + (p.ccsCostPerKgH2 ?? 0) + (p.coalCostPerKgH2 ?? 0)
+  // co2 비용: (kg CO₂/kg H₂) × ($/tonne CO₂) / 1000 (tonne 환산) = $/kg H₂
+  const co2CostPerKg = (p.co2EmissionFactor ?? 0) * (t2.co2Price ?? 0) / 1000
+  const fuelCostPerKg = (p.naturalGasCostPerKgH2 ?? 0) + (p.ccsCostPerKgH2 ?? 0) + (p.coalCostPerKgH2 ?? 0) + co2CostPerKg
   const fuelAnnual = H2_annual * fuelCostPerKg
 
   let pvOpex = 0, pvFuel = 0, pvH2 = 0
@@ -255,12 +257,11 @@ function buildElectrolyzerCashFlows(
   const H2_annual = (p.systemCapacity * p.capacityFactor * 8760) / p.energyConsumption
   const opexAnnual = capexTotal * p.opexRate * scenario.opexMultiplier
   const fuelAnnual = H2_annual * p.electricityCost * p.energyConsumption * scenario.fuelMultiplier
-  // 보조금/세액공제(subsidyPerKgH2)는 revenue에 반영 → NPV/IRR 계산도 정확해짐
-  const subsidy = t3.subsidyPerKgH2 ?? 0
-  const revenue = H2_annual * (t3.h2SellingPrice * scenario.priceMultiplier + subsidy)
   const annualDepreciation = capexTotal / t3.depreciationYears
   const wacc = t2.wacc
   const constructionYears = t3.constructionYears ?? 0
+  // 보조금 기간: subsidyDurationYears 기본값은 lifetime 전체
+  const subsidyDuration = t3.subsidyDurationYears ?? p.lifetime
 
   const rows: CashFlowRow[] = []
   let cumulativeCF = 0
@@ -296,6 +297,9 @@ function buildElectrolyzerCashFlows(
   }
 
   for (let t = 1; t <= p.lifetime; t++) {
+    // 보조금은 subsidyDuration 이내 연도에만 적용
+    const activeSubsidy = t <= subsidyDuration ? (t3.subsidyPerKgH2 ?? 0) : 0
+    const revenue = H2_annual * (t3.h2SellingPrice * scenario.priceMultiplier + activeSubsidy)
     const stackRepl = (t2.stackReplacement && t % t2.stackReplacement.interval === 0 && t < p.lifetime)
       ? capexTotal * t2.stackReplacement.costRate
       : 0
@@ -327,14 +331,15 @@ function buildSmrCashFlows(
   const capexTotal = p.capexPerTpd * p.plantCapacity * scenario.capexMultiplier
   const H2_annual = p.plantCapacity * 1000 * 365 * p.capacityFactor
   const opexAnnual = capexTotal * p.opexRate * scenario.opexMultiplier
-  const fuelCostPerKg = ((p.naturalGasCostPerKgH2 ?? 0) + (p.ccsCostPerKgH2 ?? 0) + (p.coalCostPerKgH2 ?? 0)) * scenario.fuelMultiplier
+  // co2 비용: (kg CO₂/kg H₂) × ($/tonne CO₂) / 1000 (tonne 환산) = $/kg H₂
+  const co2CostPerKg = (p.co2EmissionFactor ?? 0) * (t2.co2Price ?? 0) / 1000
+  const fuelCostPerKg = ((p.naturalGasCostPerKgH2 ?? 0) + (p.ccsCostPerKgH2 ?? 0) + (p.coalCostPerKgH2 ?? 0) + co2CostPerKg) * scenario.fuelMultiplier
   const fuelAnnual = H2_annual * fuelCostPerKg
-  // 보조금/세액공제(subsidyPerKgH2)는 revenue에 반영 → NPV/IRR 계산도 정확해짐
-  const subsidy = t3.subsidyPerKgH2 ?? 0
-  const revenue = H2_annual * (t3.h2SellingPrice * scenario.priceMultiplier + subsidy)
   const annualDepreciation = capexTotal / t3.depreciationYears
   const wacc = t2.wacc
   const constructionYears = t3.constructionYears ?? 0
+  // 보조금 기간: subsidyDurationYears 기본값은 lifetime 전체
+  const subsidyDuration = t3.subsidyDurationYears ?? p.lifetime
 
   const rows: CashFlowRow[] = []
   let cumulativeCF = 0
@@ -370,6 +375,9 @@ function buildSmrCashFlows(
   }
 
   for (let t = 1; t <= p.lifetime; t++) {
+    // 보조금은 subsidyDuration 이내 연도에만 적용
+    const activeSubsidy = t <= subsidyDuration ? (t3.subsidyPerKgH2 ?? 0) : 0
+    const revenue = H2_annual * (t3.h2SellingPrice * scenario.priceMultiplier + activeSubsidy)
     const dep = t <= t3.depreciationYears ? annualDepreciation : 0
     const taxableIncome = revenue - opexAnnual - fuelAnnual - dep
     const tax = taxableIncome > 0 ? taxableIncome * t3.taxRate : 0
