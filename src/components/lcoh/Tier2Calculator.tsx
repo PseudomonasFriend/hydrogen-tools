@@ -11,6 +11,7 @@ import PathwaySelector from './PathwaySelector'
 import ResultChart from './ResultChart'
 import TornadoChart from './TornadoChart'
 import CapexBreakdown from './CapexBreakdown'
+import SmrCapexBreakdown from './SmrCapexBreakdown'
 
 const SMR_PATHWAYS: PathwayId[] = ['smr', 'smr_ccs', 'atr_ccs', 'coal']
 
@@ -132,7 +133,16 @@ export default function Tier2Calculator({ t, lang }: Props) {
               {isSmr ? (
                 <>
                   <NumInput label={t.lcoh.plantCapacity} value={(params as SmrParams).plantCapacity} onChange={(v) => setField('plantCapacity', v)} step={10} />
-                  <NumInput label={t.lcoh.capexPerTpd} value={(params as SmrParams).capexPerTpd} onChange={(v) => setField('capexPerTpd', v)} step={100000} />
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">{t.lcoh.capexPerTpd}</label>
+                    <SmrCapexBreakdown
+                      pathway={pathway}
+                      capexPerTpd={(params as SmrParams).capexPerTpd}
+                      onCapexChange={(v) => setField('capexPerTpd', v)}
+                      lang={lang}
+                      t={t}
+                    />
+                  </div>
                   <NumInput label={t.lcoh.opexRate} value={(params as SmrParams).opexRate * 100} onChange={(v) => setField('opexRate', v / 100)} step={0.5} min={0} max={20} />
                   <NumInput label={t.lcoh.capacityFactor} value={(params as SmrParams).capacityFactor * 100} onChange={(v) => setField('capacityFactor', v / 100)} step={1} min={0} max={100} />
                   <div>

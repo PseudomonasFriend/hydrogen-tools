@@ -15,6 +15,7 @@ import { useLcohStorage } from '@/hooks/useLcohStorage'
 import PathwaySelector from './PathwaySelector'
 import ResultChart from './ResultChart'
 import CapexBreakdown from './CapexBreakdown'
+import SmrCapexBreakdown from './SmrCapexBreakdown'
 
 const SMR_PATHWAYS: PathwayId[] = ['smr', 'smr_ccs', 'atr_ccs', 'coal']
 
@@ -151,13 +152,19 @@ export default function Tier1Calculator({ t, lang }: Props) {
                 step={10}
                 error={fieldError('plantCapacity')}
               />
-              <NumInput
-                label={t.lcoh.capexPerTpd}
-                value={(params as SmrParams).capexPerTpd}
-                onChange={(v) => setField('capexPerTpd', v)}
-                step={100000}
-                error={fieldError('capexPerTpd')}
-              />
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{t.lcoh.capexPerTpd}</label>
+                <SmrCapexBreakdown
+                  pathway={pathway}
+                  capexPerTpd={(params as SmrParams).capexPerTpd}
+                  onCapexChange={(v) => setField('capexPerTpd', v)}
+                  lang={lang}
+                  t={t}
+                />
+                {fieldError('capexPerTpd') && (
+                  <p className="mt-1 text-xs text-red-500">{fieldError('capexPerTpd')}</p>
+                )}
+              </div>
               <NumInput
                 label={t.lcoh.opexRate}
                 value={(params as SmrParams).opexRate * 100}
