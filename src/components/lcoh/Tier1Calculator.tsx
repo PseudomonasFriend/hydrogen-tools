@@ -14,6 +14,7 @@ import type { ValidationError } from '@/lib/lcoh/validation'
 import { useLcohStorage } from '@/hooks/useLcohStorage'
 import PathwaySelector from './PathwaySelector'
 import ResultChart from './ResultChart'
+import CapexBreakdown from './CapexBreakdown'
 
 const SMR_PATHWAYS: PathwayId[] = ['smr', 'smr_ccs', 'atr_ccs', 'coal']
 
@@ -223,13 +224,19 @@ export default function Tier1Calculator({ t, lang }: Props) {
                 step={100}
                 error={fieldError('systemCapacity')}
               />
-              <NumInput
-                label={t.lcoh.capex}
-                value={(params as ElectrolyzerParams).capex}
-                onChange={(v) => setField('capex', v)}
-                step={50}
-                error={fieldError('capex')}
-              />
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{t.lcoh.capex}</label>
+                <CapexBreakdown
+                  pathway={pathway}
+                  capex={(params as ElectrolyzerParams).capex}
+                  onCapexChange={(v) => setField('capex', v)}
+                  lang={lang}
+                  t={t}
+                />
+                {fieldError('capex') && (
+                  <p className="mt-1 text-xs text-red-500">{fieldError('capex')}</p>
+                )}
+              </div>
               <NumInput
                 label={t.lcoh.opexRate}
                 value={(params as ElectrolyzerParams).opexRate * 100}

@@ -10,6 +10,7 @@ import { useLcohStorage } from '@/hooks/useLcohStorage'
 import PathwaySelector from './PathwaySelector'
 import ResultChart from './ResultChart'
 import TornadoChart from './TornadoChart'
+import CapexBreakdown from './CapexBreakdown'
 
 const SMR_PATHWAYS: PathwayId[] = ['smr', 'smr_ccs', 'atr_ccs', 'coal']
 
@@ -39,7 +40,7 @@ function useInitialState() {
   }
 }
 
-export default function Tier2Calculator({ t }: Props) {
+export default function Tier2Calculator({ t, lang }: Props) {
   const initialState = useInitialState()
   const [pathway, setPathway] = useState<PathwayId>(initialState.pathway)
   const [params, setParams] = useState<ElectrolyzerParams | SmrParams>(initialState.params)
@@ -149,7 +150,16 @@ export default function Tier2Calculator({ t }: Props) {
               ) : (
                 <>
                   <NumInput label={t.lcoh.systemCapacity} value={(params as ElectrolyzerParams).systemCapacity} onChange={(v) => setField('systemCapacity', v)} step={100} />
-                  <NumInput label={t.lcoh.capex} value={(params as ElectrolyzerParams).capex} onChange={(v) => setField('capex', v)} step={50} />
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">{t.lcoh.capex}</label>
+                    <CapexBreakdown
+                      pathway={pathway}
+                      capex={(params as ElectrolyzerParams).capex}
+                      onCapexChange={(v) => setField('capex', v)}
+                      lang={lang}
+                      t={t}
+                    />
+                  </div>
                   <NumInput label={t.lcoh.opexRate} value={(params as ElectrolyzerParams).opexRate * 100} onChange={(v) => setField('opexRate', v / 100)} step={0.5} min={0} max={20} />
                   <NumInput label={t.lcoh.capacityFactor} value={(params as ElectrolyzerParams).capacityFactor * 100} onChange={(v) => setField('capacityFactor', v / 100)} step={1} min={0} max={100} />
                   <NumInput label={t.lcoh.energyConsumption} value={(params as ElectrolyzerParams).energyConsumption} onChange={(v) => setField('energyConsumption', v)} step={1} />
