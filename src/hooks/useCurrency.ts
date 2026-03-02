@@ -11,11 +11,17 @@ export function useCurrency() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
 
   useEffect(() => {
-    setIsLoading(true)
-    fetchExchangeRates().then(r => {
-      setRates(r)
-      setLastUpdated(new Date().toLocaleTimeString())
-    }).finally(() => setIsLoading(false))
+    const load = async () => {
+      setIsLoading(true)
+      try {
+        const r = await fetchExchangeRates()
+        setRates(r)
+        setLastUpdated(new Date().toLocaleTimeString())
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    void load()
   }, [])
 
   // 실제 적용 환율: customRate 있으면 우선 사용
