@@ -60,9 +60,13 @@ function buildElectrolyzerCashFlows(
 ): CashFlowRow[] {
   const capexTotal = p.systemCapacity * p.capex * scenario.capexMultiplier
   const baseCapex = p.systemCapacity * p.capex  // 기준 CapEx (시나리오 승수 미적용)
-  const H2_annual = (p.systemCapacity * p.capacityFactor * 8760) / p.energyConsumption
+  // 총 에너지 소비 = 전기 + 열 (kWh/kg H₂)
+  const totalEnergyConsumption = p.energyConsumption + (p.heatConsumption ?? 0)
+  const H2_annual = (p.systemCapacity * p.capacityFactor * 8760) / totalEnergyConsumption
   const opexAnnual = baseCapex * p.opexRate * scenario.opexMultiplier
-  const fuelAnnual = H2_annual * p.electricityCost * p.energyConsumption * scenario.fuelMultiplier
+  const electricityAnnual = H2_annual * p.electricityCost * p.energyConsumption * scenario.fuelMultiplier
+  const heatAnnual = H2_annual * (p.heatCost ?? 0) * (p.heatConsumption ?? 0) * scenario.fuelMultiplier
+  const fuelAnnual = electricityAnnual + heatAnnual
   const annualDepreciation = capexTotal / t3.depreciationYears
   const wacc = t2.wacc
   const constructionYears = t3.constructionYears ?? 0

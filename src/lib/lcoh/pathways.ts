@@ -9,6 +9,8 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
     capacityFactor: 0.45,
     energyConsumption: 52,     // IEA 2024: 52~55 kWh/kg H₂
     electricityCost: 0.05,
+    heatConsumption: 0,
+    heatCost: 0,
     lifetime: 20,
   },
   alk: {
@@ -18,6 +20,8 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
     capacityFactor: 0.50,
     energyConsumption: 50,     // 효율 개선 반영
     electricityCost: 0.05,
+    heatConsumption: 0,
+    heatCost: 0,
     lifetime: 25,
   },
   aem: {
@@ -27,6 +31,8 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
     capacityFactor: 0.45,
     energyConsumption: 53,     // 소폭 개선
     electricityCost: 0.05,
+    heatConsumption: 0,
+    heatCost: 0,
     lifetime: 15,
   },
   soec: {
@@ -34,8 +40,10 @@ export const DEFAULT_PARAMS: Record<PathwayId, PathwayParams> = {
     capex: 3100,               // IEA 2024: (1700+700+400)×1.12 = 3,136 → 3,100
     opexRate: 0.05,
     capacityFactor: 0.70,      // 2024 실증 수준 현실적 값 (0.85는 과낙관적)
-    energyConsumption: 43,     // 37은 열통합 이상적 조건, 현실적 값은 42~45
+    energyConsumption: 35,     // 전기 소비량만 (kWh_e/kg H₂), 총 에너지 43에서 열 분리
     electricityCost: 0.04,
+    heatConsumption: 8,        // 열 소비량 (kWh_th/kg H₂), 폐열 연계 시 0으로 설정 가능
+    heatCost: 0.02,            // 열 단가 ($/kWh_th), 산업 폐열 기준 $0.01~0.03
     lifetime: 10,
   },
   smr: {

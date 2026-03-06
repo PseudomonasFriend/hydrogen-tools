@@ -6,8 +6,10 @@ export interface ElectrolyzerParams {
   capex: number             // $/kW
   opexRate: number          // fraction (0.04 = 4%)
   capacityFactor: number    // fraction (0.45 = 45%)
-  energyConsumption: number // kWh/kg H₂
+  energyConsumption: number // kWh/kg H₂ (전기만, SOEC의 경우 전기 소비량)
   electricityCost: number   // $/kWh
+  heatConsumption: number   // kWh/kg H₂ (열 소비량, SOEC 전용, 기타 경로 0)
+  heatCost: number          // $/kWh (열 단가, SOEC 전용, 기타 경로 0)
   lifetime: number          // years
 }
 

@@ -301,14 +301,7 @@ export default function Tier2ParameterPanel({
                   />
                   <p className="text-xs text-gray-400 mt-1">
                     {t.lcoh.derivedDailyProduction}:{' '}
-                    {(params as ElectrolyzerParams).energyConsumption
-                      ? Math.round(
-                          (params as ElectrolyzerParams).systemCapacity *
-                            (params as ElectrolyzerParams).capacityFactor *
-                            24 /
-                            (params as ElectrolyzerParams).energyConsumption,
-                        ).toLocaleString()
-                      : '—'}{' '}
+                    {(() => { const ep = params as ElectrolyzerParams; const te = ep.energyConsumption + (ep.heatConsumption ?? 0); return te ? Math.round(ep.systemCapacity * ep.capacityFactor * 24 / te).toLocaleString() : '—'; })()}{' '}
                     kg/day
                   </p>
                 </div>
@@ -382,6 +375,24 @@ export default function Tier2ParameterPanel({
               step={1}
               unit="kWh/kg H₂"
             />
+          )}
+          {!isSmr && pathway === 'soec' && (
+            <>
+              <NumInput
+                label={t.lcoh.heatConsumption}
+                value={(params as ElectrolyzerParams).heatConsumption ?? 0}
+                onChange={(v) => setField('heatConsumption', v)}
+                step={1}
+                unit="kWh/kg H₂"
+              />
+              <NumInput
+                label={t.lcoh.heatCost}
+                value={(params as ElectrolyzerParams).heatCost ?? 0}
+                onChange={(v) => setField('heatCost', v)}
+                step={0.01}
+                unit="$/kWh"
+              />
+            </>
           )}
           <NumInput
             label={t.lcoh.opexRate}

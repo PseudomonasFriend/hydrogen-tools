@@ -1,8 +1,11 @@
 import type { ElectrolyzerParams, SmrParams, Tier1Result } from './types'
 
 export function calcElectrolyzerLCOH(p: ElectrolyzerParams): Tier1Result {
+  // 총 에너지 소비 = 전기 + 열 (kWh/kg H₂) — H₂ 생산량 산출용
+  const totalEnergyConsumption = p.energyConsumption + (p.heatConsumption ?? 0)
+
   // 연간 H₂ 생산량 (kg/year)
-  const H2_annual = (p.systemCapacity * p.capacityFactor * 8760) / p.energyConsumption
+  const H2_annual = (p.systemCapacity * p.capacityFactor * 8760) / totalEnergyConsumption
 
   // 총 CapEx ($)
   const capexTotal = p.systemCapacity * p.capex
@@ -10,8 +13,10 @@ export function calcElectrolyzerLCOH(p: ElectrolyzerParams): Tier1Result {
   // 연간 O&M 비용 ($)
   const opexAnnual = capexTotal * p.opexRate
 
-  // 연간 연료(전기) 비용 ($)
-  const fuelAnnual = H2_annual * p.electricityCost * p.energyConsumption
+  // 연간 연료(전기+열) 비용 ($)
+  const electricityAnnual = H2_annual * p.electricityCost * p.energyConsumption
+  const heatAnnual = H2_annual * (p.heatCost ?? 0) * (p.heatConsumption ?? 0)
+  const fuelAnnual = electricityAnnual + heatAnnual
 
   // 수명 기간 총 생산량 (kg)
   const totalLifetimeH2 = H2_annual * p.lifetime

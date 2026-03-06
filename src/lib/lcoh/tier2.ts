@@ -5,10 +5,14 @@ import type {
 import { calcElectrolyzerLCOH, calcSmrLCOH } from './tier1'
 
 export function calcElectrolyzerLCOH_T2(p: ElectrolyzerParams, t2: Tier2ExtraParams): Tier2Result {
-  const H2_annual = (p.systemCapacity * p.capacityFactor * 8760) / p.energyConsumption
+  // 총 에너지 소비 = 전기 + 열 (kWh/kg H₂)
+  const totalEnergyConsumption = p.energyConsumption + (p.heatConsumption ?? 0)
+  const H2_annual = (p.systemCapacity * p.capacityFactor * 8760) / totalEnergyConsumption
   const capexTotal = p.systemCapacity * p.capex
   const opexAnnual = capexTotal * p.opexRate
-  const fuelAnnual = H2_annual * p.electricityCost * p.energyConsumption
+  const electricityAnnual = H2_annual * p.electricityCost * p.energyConsumption
+  const heatAnnual = H2_annual * (p.heatCost ?? 0) * (p.heatConsumption ?? 0)
+  const fuelAnnual = electricityAnnual + heatAnnual
 
   let pvOpex = 0, pvFuel = 0, pvStackRepl = 0, pvH2 = 0
 

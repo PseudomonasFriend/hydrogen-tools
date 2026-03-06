@@ -43,7 +43,8 @@ export function useTier1Calculation() {
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [targetH2KgPerDay, setTargetH2KgPerDay] = useState<number>(() => {
     const p = initialState.params as ElectrolyzerParams
-    return Math.round(p.systemCapacity * p.capacityFactor * 24 / (p.energyConsumption || 52))
+    const totalEnergy = p.energyConsumption + (p.heatConsumption ?? 0)
+    return Math.round(p.systemCapacity * p.capacityFactor * 24 / (totalEnergy || 52))
   })
 
   const storage = useLcohStorage()
@@ -106,8 +107,9 @@ export function useTier1Calculation() {
   const handleSystemCapacityChange = (v: number) => {
     setField('systemCapacity', v)
     const elecP = params as ElectrolyzerParams
-    if (elecP.energyConsumption) {
-      setTargetH2KgPerDay(Math.round(v * elecP.capacityFactor * 24 / elecP.energyConsumption))
+    const totalEnergy = elecP.energyConsumption + (elecP.heatConsumption ?? 0)
+    if (totalEnergy) {
+      setTargetH2KgPerDay(Math.round(v * elecP.capacityFactor * 24 / totalEnergy))
     }
   }
 
@@ -116,7 +118,8 @@ export function useTier1Calculation() {
     setTargetH2KgPerDay(kgPerDay)
     const elecP = params as ElectrolyzerParams
     if (!elecP.capacityFactor || !elecP.energyConsumption) return
-    const derived = kgPerDay * elecP.energyConsumption / (24 * elecP.capacityFactor)
+    const totalEnergy = elecP.energyConsumption + (elecP.heatConsumption ?? 0)
+    const derived = kgPerDay * totalEnergy / (24 * elecP.capacityFactor)
     setField('systemCapacity', Math.round(derived))
   }
 
