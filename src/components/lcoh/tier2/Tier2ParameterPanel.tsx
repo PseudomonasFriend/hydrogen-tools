@@ -9,6 +9,7 @@ import SmrCapexBreakdown from '../SmrCapexBreakdown'
 
 // ── Accordion 파라미터 그룹 ──────────────────────────────────────────────────
 function ParamGroup({
+  id,
   label,
   open,
   onToggle,
@@ -26,6 +27,8 @@ function ParamGroup({
         type="button"
         onClick={onToggle}
         className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+        aria-expanded={open}
+        aria-controls={`param-group-${id}`}
       >
         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{label}</span>
         <svg
@@ -38,7 +41,10 @@ function ParamGroup({
         </svg>
       </button>
       {open && (
-        <div className="px-4 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div
+          id={`param-group-${id}`}
+          className="px-4 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4"
+        >
           {children}
         </div>
       )}

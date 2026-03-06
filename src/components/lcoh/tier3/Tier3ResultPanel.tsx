@@ -65,10 +65,10 @@ export default function Tier3ResultPanel({
   currencyCtx,
   resultRef,
 }: Props) {
-  const scenarioLabel = (id: string): string => {
-    if (id === 'optimistic') return t.lcoh3.optimistic
-    if (id === 'conservative') return t.lcoh3.conservative
-    return t.lcoh3.base
+  const scenarioLabels: Record<string, string> = {
+    optimistic: t.lcoh3.optimistic,
+    base: t.lcoh3.base,
+    conservative: t.lcoh3.conservative,
   }
 
   return (
@@ -122,7 +122,7 @@ export default function Tier3ResultPanel({
                     subLabel={breakEvenResult.margin >= 0 ? t.lcoh3.breakEvenPositive : t.lcoh3.breakEvenNegative}
                     subValue={
                       breakEvenResult.exceeded
-                        ? (lang === 'ko' ? '탐색 범위 초과' : 'Exceeds search range')
+                        ? t.lcoh3.breakEvenExceeded.replace('${price}', `${currencyCtx.currencyInfo.symbol}${currencyCtx.convert(breakEvenResult.breakEvenPrice).toFixed(currencyCtx.currencyInfo.decimals)}`)
                         : `${breakEvenResult.margin >= 0 ? '+' : ''}${currencyCtx.currencyInfo.symbol}${currencyCtx.convert(Math.abs(breakEvenResult.margin)).toFixed(currencyCtx.currencyInfo.decimals)}`
                     }
                   />
@@ -154,7 +154,7 @@ export default function Tier3ResultPanel({
                     >
                       {/* 시나리오 이름 */}
                       <div className="text-xs font-semibold text-gray-600 mb-0.5">
-                        {scenarioLabel(s.id)}
+                        {scenarioLabels[s.id] ?? s.id}
                       </div>
                       {/* 가정 텍스트 */}
                       <div className="text-xs text-gray-400 mb-3">
