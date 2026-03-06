@@ -40,7 +40,7 @@ export default async function LangLayout({
         <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
           <div className="flex items-center gap-6">
             <Link href={`/${lang}`} className="text-base font-bold text-blue-700">
-              H₂ Tools
+              H2Prism
             </Link>
             <Link href={`/${lang}/lcoh`} className="text-sm text-gray-600 hover:text-gray-900">
               {t.nav.lcoh}
@@ -63,6 +63,22 @@ export default async function LangLayout({
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {children}
       </main>
+      {/* 푸터 */}
+      <footer className="border-t border-gray-200 bg-white mt-12">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <span className="text-sm font-bold text-blue-700">H2Prism</span>
+              <span className="text-xs text-gray-400 ml-2">Hydrogen Economics, Decoded</span>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-gray-400">
+              <Link href={`/${lang}/about`} className="hover:text-gray-600">{t.nav.about}</Link>
+              <Link href={`/${lang}/privacy`} className="hover:text-gray-600">{t.nav.privacy}</Link>
+              <span>&copy; {new Date().getFullYear()} H2Prism</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

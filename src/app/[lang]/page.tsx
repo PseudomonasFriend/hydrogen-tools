@@ -38,6 +38,24 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
           <p className="text-sm text-gray-600">{t.home.tier3Desc}</p>
         </Link>
       </div>
+
+      {/* Excel 모델 CTA */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6 text-center">
+        <h2 className="text-lg font-bold text-gray-900 mb-2">{t.home.getExcelModels}</h2>
+        <p className="text-sm text-gray-600 mb-4 max-w-lg mx-auto">{t.home.excelModelDesc}</p>
+        <a
+          href="https://gumroad.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          {t.home.getExcelModels}
+        </a>
+        <p className="text-xs text-gray-400 mt-3">Tier 1 (Free) / Tier 2 ($24) / Tier 3 ($59)</p>
+      </div>
     </div>
   )
 }
