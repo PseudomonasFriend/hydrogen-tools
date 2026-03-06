@@ -44,7 +44,7 @@ function hasLevel1Data(ref: SmrCapexRef): boolean {
   )
 }
 
-export default function SmrCapexBreakdown({ pathway, capexPerTpd, onCapexChange, lang }: Props) {
+export default function SmrCapexBreakdown({ pathway, capexPerTpd, onCapexChange, lang, t }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [selectedRefId, setSelectedRefId] = useState('custom')
   const refs = getRefsByPathway(pathway)
@@ -159,6 +159,14 @@ export default function SmrCapexBreakdown({ pathway, capexPerTpd, onCapexChange,
       {selectedRefObj && selectedRefObj.source && (
         <p className="text-xs text-gray-400 italic">{selectedRefObj.source}</p>
       )}
+
+      {/* SMR CapEx 기준 규모 안내 툴팁 */}
+      <p className="text-xs text-gray-400 flex items-center gap-1" title={t.lcoh3.smrScaleTooltip}>
+        <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+        </svg>
+        <span>{t.lcoh3.smrScaleTooltip}</span>
+      </p>
 
       {/* Level 0 입력 */}
       <input

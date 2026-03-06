@@ -122,4 +122,5 @@ export interface Tier3Result {
 export interface BreakEvenResult {
   breakEvenPrice: number    // NPV=0이 되는 최소 H₂ 판매가 ($/kg)
   margin: number            // 현재 판매가 - break-even 가격 (양수면 수익, 음수면 손실)
+  exceeded: boolean         // break-even이 탐색 범위($50/kg)를 초과했는지
 }

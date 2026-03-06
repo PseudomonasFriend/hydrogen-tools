@@ -34,7 +34,7 @@ function getRefsByPathway(pathway: PathwayId): ElectrolyzerCapexRef[] {
   }
 }
 
-export default function CapexBreakdown({ pathway, capex, onCapexChange, lang }: Props) {
+export default function CapexBreakdown({ pathway, capex, onCapexChange, lang, t }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [expandedL2, setExpandedL2] = useState(false)
   const [selectedRefId, setSelectedRefId] = useState('custom')
@@ -229,12 +229,20 @@ export default function CapexBreakdown({ pathway, capex, onCapexChange, lang }: 
             hint="$/kW"
             highlight={expandedL2}  // Level 2 열릴 때 연동 표시
           />
-          <MiniInput
-            label={lang === 'ko' ? 'BOP (전력공급·냉각·수처리)' : 'BOP (Power Supply, Cooling, Water)'}
-            value={breakdown.bop}
-            onChange={(v) => handleL1Change('bop', v)}
-            hint="$/kW"
-          />
+          <div>
+            <MiniInput
+              label={lang === 'ko' ? 'BOP (전력공급·냉각·수처리)' : 'BOP (Power Supply, Cooling, Water)'}
+              value={breakdown.bop}
+              onChange={(v) => handleL1Change('bop', v)}
+              hint="$/kW"
+            />
+            <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1" title={t.lcoh3.bopRefTooltip}>
+              <svg className="w-3 h-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+              </svg>
+              <span>{t.lcoh3.bopRefTooltip}</span>
+            </p>
+          </div>
           <MiniInput
             label={lang === 'ko' ? 'EPC (설계·시공·시운전)' : 'EPC (Engineering, Construction)'}
             value={breakdown.epc}
