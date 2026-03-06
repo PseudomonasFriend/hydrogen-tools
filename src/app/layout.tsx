@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Hydrogen Tools',
-  description: '수소 경제성 분석 도구 — LCOH 계산기',
+  title: 'H2Prism — Hydrogen Economics, Decoded',
+  description: 'LCOH Calculator for hydrogen production pathways — H2Prism',
 };
 
 export default function RootLayout({
