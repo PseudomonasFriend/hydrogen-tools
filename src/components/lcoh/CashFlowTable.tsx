@@ -11,9 +11,9 @@ interface Props {
 }
 
 function fmt(n: number): string {
-  if (Math.abs(n) >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`
-  if (Math.abs(n) >= 1_000) return `$${(n / 1_000).toFixed(0)}K`
-  return `$${n.toFixed(0)}`
+  if (Math.abs(n) >= 1_000_000) return `$${(n / 1_000_000).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}M`
+  if (Math.abs(n) >= 1_000) return `$${(n / 1_000).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}K`
+  return `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 }
 
 // 0 또는 음수에 가까운 값은 '-' 로 표시 (스택 교체비 등 대부분 연도 0인 경우 가독성)
