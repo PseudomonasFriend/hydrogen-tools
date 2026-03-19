@@ -10,6 +10,8 @@ export async function generateStaticParams() {
   return [{ lang: 'ko' }, { lang: 'en' }]
 }
 
+const BASE_URL = 'https://web-kappa-navy.vercel.app'
+
 export async function generateMetadata({
   params,
 }: {
@@ -17,9 +19,26 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params
   const t = translations[(lang as Lang) ?? 'ko'] ?? ko
+  const canonical = `${BASE_URL}/${lang}`
   return {
     title: t.site.title,
     description: t.site.description,
+    alternates: {
+      canonical,
+      languages: {
+        'ko': `${BASE_URL}/ko`,
+        'en': `${BASE_URL}/en`,
+        'x-default': `${BASE_URL}/en`,
+      },
+    },
+    openGraph: {
+      title: t.site.title,
+      description: t.site.description,
+      url: canonical,
+      locale: lang === 'ko' ? 'ko_KR' : 'en_US',
+      alternateLocale: lang === 'ko' ? ['en_US'] : ['ko_KR'],
+      type: 'website',
+    },
   }
 }
 

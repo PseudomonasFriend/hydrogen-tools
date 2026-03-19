@@ -9,6 +9,7 @@ export function useCurrency() {
   const [customRate, setCustomRate] = useState<number | null>(null)  // null = 실시간 사용
   const [isLoading, setIsLoading] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+  const [isFallback, setIsFallback] = useState(true)
 
   useEffect(() => {
     const load = async () => {
@@ -16,7 +17,12 @@ export function useCurrency() {
       try {
         const r = await fetchExchangeRates()
         setRates(r)
-        setLastUpdated(new Date().toLocaleTimeString())
+        // FALLBACK_RATES와 KRW/EUR 모두 동일하면 실제 fetch 실패로 간주
+        const usedFallback = r.KRW === FALLBACK_RATES.KRW && r.EUR === FALLBACK_RATES.EUR
+        setIsFallback(usedFallback)
+        setLastUpdated(usedFallback ? null : new Date().toLocaleTimeString())
+      } catch {
+        setIsFallback(true)
       } finally {
         setIsLoading(false)
       }
@@ -36,6 +42,7 @@ export function useCurrency() {
     rates, activeRate,
     customRate, setCustomRate,
     isLoading, lastUpdated,
+    isFallback,
     convert, currencyInfo,
   }
 }
