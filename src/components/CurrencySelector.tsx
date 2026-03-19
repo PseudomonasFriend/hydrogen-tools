@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import type { CurrencyCode } from '@/lib/currency'
 import { CURRENCIES } from '@/lib/currency'
+import type { Translations } from '@/lib/i18n/ko'
 
 interface Props {
   currency: CurrencyCode
@@ -11,17 +12,24 @@ interface Props {
   setCustomRate: (r: number | null) => void
   isLoading: boolean
   lastUpdated: string | null
+  t?: Translations
 }
 
 export default function CurrencySelector({
-  currency, setCurrency, rates, customRate, setCustomRate, isLoading, lastUpdated
+  currency, setCurrency, rates, customRate, setCustomRate, isLoading, lastUpdated, t,
 }: Props) {
   const [useCustom, setUseCustom] = useState(false)
   const currentRate = customRate ?? rates[currency]
 
+  const label = t?.currency.label ?? 'Currency'
+  const customInputLabel = t?.currency.customInput ?? 'Custom'
+  const loadingText = t?.currency.loading ?? 'Loading rates...'
+  const ratePrefix = t?.currency.ratePrefix ?? '1 USD ='
+  const rateSuffix = t?.currency.rateSuffix ?? 'as of'
+
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm">
-      <span className="text-xs text-gray-500">단위:</span>
+      <span className="text-xs text-gray-500">{label}:</span>
       {CURRENCIES.map(c => (
         <button
           key={c.code}
@@ -37,8 +45,8 @@ export default function CurrencySelector({
       ))}
       {currency !== 'USD' && (
         <span className="text-xs text-gray-500">
-          {isLoading ? '환율 로딩 중...' : `1 USD = ${currentRate.toLocaleString()} ${currency}`}
-          {lastUpdated && !isLoading && <span className="ml-1 text-gray-400">({lastUpdated} 기준)</span>}
+          {isLoading ? loadingText : `${ratePrefix} ${currentRate.toLocaleString()} ${currency}`}
+          {lastUpdated && !isLoading && <span className="ml-1 text-gray-400">({rateSuffix} {lastUpdated})</span>}
         </span>
       )}
       {currency !== 'USD' && (
@@ -52,7 +60,7 @@ export default function CurrencySelector({
               else setCustomRate(rates[currency])
             }}
           />
-          직접 입력
+          {customInputLabel}
         </label>
       )}
       {useCustom && currency !== 'USD' && (

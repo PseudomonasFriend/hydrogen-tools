@@ -175,7 +175,7 @@ export default function Tier2ParameterPanel({
             />
           </svg>
           <h3 className="text-sm font-semibold text-slate-700">
-            {lang === 'ko' ? '지역 에너지 가격 프리셋' : 'Regional Energy Preset'}
+            {t.common.regionalPresetTitle}
           </h3>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -191,8 +191,8 @@ export default function Tier2ParameterPanel({
               </span>
               <span className="text-xs text-slate-400 mt-0.5">
                 {isSmr
-                  ? `가스 $${preset.naturalGasCost}/kg`
-                  : `전기 $${preset.electricityCost}/kWh`}
+                  ? `${t.common.gasPresetLabel} $${preset.naturalGasCost}/kg`
+                  : `${t.common.elecPresetLabel} $${preset.electricityCost}/kWh`}
               </span>
             </button>
           ))}
@@ -556,9 +556,7 @@ export default function Tier2ParameterPanel({
         }`}
       >
         {isStale
-          ? lang === 'ko'
-            ? '변경 사항 반영하여 재계산'
-            : 'Recalculate'
+          ? t.common.recalculate
           : t.lcoh.calculate}
       </button>
     </div>

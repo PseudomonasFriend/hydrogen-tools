@@ -53,7 +53,6 @@ interface Props {
 
 export default function Tier1ResultPanel({
   t,
-  lang,
   result,
   isSmr,
   params,
@@ -64,7 +63,7 @@ export default function Tier1ResultPanel({
     return (
       <div className="hidden lg:flex bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 p-8 items-center justify-center">
         <p className="text-sm text-gray-400 text-center whitespace-pre-line">
-          {lang === 'ko' ? '파라미터를 입력하고\n계산 버튼을 누르세요' : 'Enter parameters and\nclick Calculate'}
+          {t.common.enterParamsPrompt}
         </p>
       </div>
     )
@@ -76,7 +75,7 @@ export default function Tier1ResultPanel({
         <h2 className="text-sm font-semibold text-gray-700">{t.lcoh.result}</h2>
       </div>
       <div className="mb-4 pb-3 border-b border-gray-100">
-        <CurrencySelector {...currencyCtx} />
+        <CurrencySelector {...currencyCtx} t={t} />
       </div>
 
       {/* LCOH 메인 숫자 */}
@@ -95,7 +94,7 @@ export default function Tier1ResultPanel({
         return (
           <div className="mt-3 bg-slate-50 rounded-lg px-4 py-3 border border-slate-100">
             <div className="text-xs text-slate-500 mb-1">
-              {lang === 'ko' ? '총 설비 투자비 (Total CapEx)' : 'Total Capital Cost'}
+              {t.common.totalCapexLabel}
             </div>
             <div className="text-lg font-bold text-slate-700">
               {currencyCtx.currencyInfo.symbol}{(currencyCtx.convert(totalCapexUsd) / 1_000_000).toFixed(1)}M
@@ -125,9 +124,7 @@ export default function Tier1ResultPanel({
 
       {/* 데이터 출처 */}
       <p className="mt-3 text-xs text-gray-400 text-right">
-        {lang === 'ko'
-          ? '기본값 출처: IEA Global Hydrogen Review 2024 · IRENA 2024'
-          : 'Default values: IEA Global Hydrogen Review 2024 · IRENA 2024'}
+        {t.common.dataSourceNote}
       </p>
     </div>
   )

@@ -103,10 +103,10 @@ export default function Tier1ParameterPanel({
               d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <h3 className="text-sm font-semibold text-slate-700">
-            {lang === 'ko' ? '지역 에너지 가격 프리셋' : 'Regional Energy Preset'}
+            {t.common.regionalPresetTitle}
           </h3>
           <span className="ml-auto text-xs text-slate-400">
-            {lang === 'ko' ? '클릭 시 에너지 비용 자동 적용' : 'Click to apply energy cost'}
+            {t.common.regionalPresetHint}
           </span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -119,8 +119,8 @@ export default function Tier1ParameterPanel({
               </span>
               <span className="text-xs text-slate-400 mt-0.5">
                 {isSmr
-                  ? `가스 $${preset.naturalGasCost}/kg`
-                  : `전기 $${preset.electricityCost}/kWh`
+                  ? `${t.common.gasPresetLabel} $${preset.naturalGasCost}/kg`
+                  : `${t.common.elecPresetLabel} $${preset.electricityCost}/kWh`
                 }
               </span>
             </button>
@@ -212,7 +212,7 @@ export default function Tier1ParameterPanel({
                 step={1}
                 min={5}
                 max={40}
-                unit="년"
+                unit={t.common.yearUnit}
                 error={fieldError('lifetime')}
               />
             </div>
@@ -226,8 +226,8 @@ export default function Tier1ParameterPanel({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
               {showAdvanced
-                ? (lang === 'ko' ? '고급 설정 접기' : 'Hide Advanced')
-                : (lang === 'ko' ? '고급 설정 (O&M율, 가동률)' : 'Advanced Settings (O&M, capacity factor)')
+                ? t.common.advancedHide
+                : t.common.advancedShowSmr
               }
             </button>
 
@@ -350,7 +350,7 @@ export default function Tier1ParameterPanel({
                 step={1}
                 min={5}
                 max={40}
-                unit="년"
+                unit={t.common.yearUnit}
                 error={fieldError('lifetime')}
               />
             </div>
@@ -364,8 +364,8 @@ export default function Tier1ParameterPanel({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
               {showAdvanced
-                ? (lang === 'ko' ? '고급 설정 접기' : 'Hide Advanced')
-                : (lang === 'ko' ? '고급 설정 (에너지 소비량, O&M율, 가동률)' : 'Advanced Settings (energy, O&M, capacity factor)')
+                ? t.common.advancedHide
+                : t.common.advancedShowElectrolyzer
               }
             </button>
 

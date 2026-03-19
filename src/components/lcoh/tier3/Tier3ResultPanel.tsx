@@ -84,7 +84,7 @@ export default function Tier3ResultPanel({
               <h2 className="text-sm font-semibold text-gray-700">{t.lcoh3.summary}</h2>
             </div>
             <div className="mb-4 pb-3 border-b border-gray-100">
-              <CurrencySelector {...currencyCtx} />
+              <CurrencySelector {...currencyCtx} t={t} />
             </div>
 
             {/* KPI 카드 (2x3 그리드) */}
@@ -96,7 +96,7 @@ export default function Tier3ResultPanel({
               />
               <SummaryCard
                 label={`${t.lcoh3.irr} ${t.lcoh3.irrBasis}`}
-                value={isNaN(result.irr) ? (lang === 'ko' ? '수익성 없음' : 'N/A') : `${(result.irr * 100).toFixed(1)}%`}
+                value={isNaN(result.irr) ? t.common.irrNotProfitable : `${(result.irr * 100).toFixed(1)}%`}
                 positive={!isNaN(result.irr) && result.irr > t2Params.wacc}
               />
               <SummaryCard
@@ -173,13 +173,13 @@ export default function Tier3ResultPanel({
                       <div className="flex justify-between text-xs text-gray-500 pt-2 border-t border-gray-200 mt-2">
                         <span>
                           IRR {isNaN(s.irr)
-                            ? (lang === 'ko' ? '수익성 없음' : 'N/A')
+                            ? t.common.irrNotProfitable
                             : `${(s.irr * 100).toFixed(1)}%`}
                         </span>
                         <span>
                           {s.paybackYear !== null
-                            ? `${s.paybackYear}${lang === 'ko' ? '년 회수' : 'yr payback'}`
-                            : (lang === 'ko' ? '회수 불가' : 'No payback')}
+                            ? `${s.paybackYear}${t.common.paybackYears}`
+                            : t.common.paybackNone}
                         </span>
                       </div>
                     </div>
@@ -198,9 +198,7 @@ export default function Tier3ResultPanel({
           /* 결과 없을 때 플레이스홀더 */
           <div className="bg-gray-50 rounded-xl border border-dashed border-gray-200 p-8 text-center">
             <div className="text-gray-400 text-sm">
-              {lang === 'ko'
-                ? '파라미터를 설정하고 계산을 실행하세요'
-                : 'Set parameters and run calculation'}
+              {t.common.setParamsAndRun}
             </div>
           </div>
         )}

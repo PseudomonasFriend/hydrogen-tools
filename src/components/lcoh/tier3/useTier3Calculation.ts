@@ -15,12 +15,7 @@ import { calcTier3, calcBreakEven } from '@/lib/lcoh/calculations'
 import { useLcohStorage } from '@/hooks/useLcohStorage'
 import { useCurrency } from '@/hooks/useCurrency'
 import { REGIONAL_PRESETS } from '@/lib/lcoh/presets'
-
-const SMR_PATHWAYS: PathwayId[] = ['smr', 'smr_ccs', 'atr_ccs', 'coal']
-
-export function isSmrPathway(id: PathwayId): boolean {
-  return SMR_PATHWAYS.includes(id)
-}
+import { isSmrPathway } from '@/lib/lcoh/utils'
 
 function useInitialState() {
   const storage = useLcohStorage()

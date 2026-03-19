@@ -39,7 +39,7 @@ interface Props {
   lang: Lang
 }
 
-export default function PathwayComparison({ t, lang }: Props) {
+export default function PathwayComparison({ t }: Props) {
   const [electricityCost, setElectricityCost] = useState(0.05)
   const [naturalGasCost, setNaturalGasCost] = useState(1.2)
   const [coalCost, setCoalCost] = useState(0.6)
@@ -89,19 +89,17 @@ export default function PathwayComparison({ t, lang }: Props) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
       <h2 className="text-sm font-medium text-gray-600 mb-1">
-        {lang === 'ko' ? '전체 경로 비교' : 'All Pathway Comparison'}
+        {t.common.comparisonTitle}
       </h2>
       <p className="text-xs text-gray-400 mb-4">
-        {lang === 'ko'
-          ? '에너지 단가를 변경하면 8개 경로 LCOH가 실시간 업데이트됩니다.'
-          : 'Change energy costs to update all 8 pathway LCOHs in real time.'}
+        {t.common.comparisonDesc}
       </p>
 
       {/* 에너지 단가 입력 */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">
-            {lang === 'ko' ? '전기 단가 ($/kWh)' : 'Electricity ($/kWh)'}
+            {t.lcoh.electricityCost}
           </label>
           <input
             type="number"
@@ -114,7 +112,7 @@ export default function PathwayComparison({ t, lang }: Props) {
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">
-            {lang === 'ko' ? '천연가스 ($/kg H₂)' : 'Natural Gas ($/kg H₂)'}
+            {t.lcoh.naturalGasCost}
           </label>
           <p className="text-xs text-gray-400 mb-1">※ $/MMBtu × 0.20 ≈ $/kg H₂</p>
           <input
@@ -128,7 +126,7 @@ export default function PathwayComparison({ t, lang }: Props) {
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">
-            {lang === 'ko' ? '석탄 ($/kg H₂)' : 'Coal ($/kg H₂)'}
+            {t.lcoh.coalCost}
           </label>
           <input
             type="number"
@@ -144,7 +142,7 @@ export default function PathwayComparison({ t, lang }: Props) {
       {/* Tier 비교 모드 선택 */}
       <div className="flex items-center gap-4 mb-6">
         <span className="text-xs text-gray-500">
-          {lang === 'ko' ? '비교 기준:' : 'Compare by:'}
+          {t.common.compareBy}
         </span>
         <button
           onClick={() => setCompareMode('tier1')}
@@ -217,11 +215,11 @@ export default function PathwayComparison({ t, lang }: Props) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="text-left py-2 text-xs text-gray-500 font-medium">{lang === 'ko' ? '순위' : 'Rank'}</th>
-              <th className="text-left py-2 text-xs text-gray-500 font-medium">{lang === 'ko' ? '경로' : 'Pathway'}</th>
+              <th className="text-left py-2 text-xs text-gray-500 font-medium">#</th>
+              <th className="text-left py-2 text-xs text-gray-500 font-medium">{t.lcoh.pathway}</th>
               <th className="text-right py-2 text-xs text-gray-500 font-medium">LCOH ($/kg H₂)</th>
               <th className="text-right py-2 text-xs text-gray-500 font-medium">
-                {lang === 'ko' ? 'CO₂ 배출' : 'CO₂ Intensity'} (kg/kg H₂)
+                CO₂ (kg/kg H₂)
               </th>
             </tr>
           </thead>

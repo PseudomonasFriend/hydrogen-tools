@@ -176,8 +176,8 @@ export default function Tier3ParameterPanel({
         </div>
         <p className="text-xs text-gray-400 mt-2">
           {isSmr
-            ? (lang === 'ko' ? '가스/석탄 비용 반영' : 'Applies gas/coal cost')
-            : (lang === 'ko' ? '전기 단가 반영' : 'Applies electricity cost')}
+            ? t.common.gasApplied
+            : t.common.elecApplied}
         </p>
       </div>
 
@@ -570,7 +570,7 @@ export default function Tier3ParameterPanel({
         }`}
       >
         {isStale
-          ? (lang === 'ko' ? '변경 사항 반영하여 재계산' : 'Recalculate')
+          ? t.common.recalculate
           : t.lcoh3.calculate}
       </button>
     </div>

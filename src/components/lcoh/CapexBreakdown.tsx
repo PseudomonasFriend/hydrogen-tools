@@ -166,7 +166,7 @@ export default function CapexBreakdown({ pathway, capex, onCapexChange, lang, t 
       />
       {expanded && (
         <p className="text-xs text-blue-600 mt-0.5">
-          {lang === 'ko' ? '※ 항목 합산값 자동 반영' : '※ Auto-calculated from breakdown'}
+          {t.common.breakdownAutoCalc}
         </p>
       )}
 
@@ -177,7 +177,7 @@ export default function CapexBreakdown({ pathway, capex, onCapexChange, lang, t 
         className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
       >
         <span>{expanded ? '▲' : '▼'}</span>
-        <span>{lang === 'ko' ? '항목별로 나눠서 입력' : 'Enter cost breakdown'}</span>
+        <span>{t.common.breakdownExpand}</span>
       </button>
 
       {expanded && (
@@ -198,7 +198,7 @@ export default function CapexBreakdown({ pathway, capex, onCapexChange, lang, t 
             className="text-xs text-blue-500 hover:text-blue-700 flex items-center gap-1"
           >
             <span>{expandedL2 ? '▲' : '▼'}</span>
-            <span>{lang === 'ko' ? '스택/BOS 분리 입력' : 'Split Stack / BOS'}</span>
+            <span>{t.common.splitStackBos}</span>
           </button>
 
           {expandedL2 && (

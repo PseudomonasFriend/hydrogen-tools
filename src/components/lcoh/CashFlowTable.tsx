@@ -22,7 +22,7 @@ function fmtOrDash(n: number): string {
   return fmt(n)
 }
 
-export default function CashFlowTable({ cashFlows, t, lang }: Props) {
+export default function CashFlowTable({ cashFlows, t }: Props) {
   const [showDetail, setShowDetail] = useState(false)
 
   // paybackYear: cumulativeCF >= 0이 되는 첫 번째 운영 연도 (year > 0)
@@ -33,7 +33,7 @@ export default function CashFlowTable({ cashFlows, t, lang }: Props) {
       {/* 헤더 + 상세 토글 */}
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-sm font-medium text-gray-600">
-          {lang === 'ko' ? '연도별 현금흐름' : 'Annual Cash Flow'}
+          {t.common.annualCashFlow}
         </h3>
         <button
           type="button"
@@ -41,8 +41,8 @@ export default function CashFlowTable({ cashFlows, t, lang }: Props) {
           className="text-xs text-blue-600 hover:text-blue-800 underline"
         >
           {showDetail
-            ? (lang === 'ko' ? '간략 보기' : 'Compact View')
-            : (lang === 'ko' ? '상세 보기 (매출·비용·세금)' : 'Detailed View')}
+            ? t.common.compactView
+            : t.common.detailedView}
         </button>
       </div>
 

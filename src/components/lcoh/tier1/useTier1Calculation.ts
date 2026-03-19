@@ -5,18 +5,12 @@ import type { PathwayId, ElectrolyzerParams, SmrParams, Tier1Result } from '@/li
 import { isSmrParams } from '@/lib/lcoh/types'
 import { DEFAULT_PARAMS } from '@/lib/lcoh/pathways'
 import { calcElectrolyzerLCOH, calcSmrLCOH } from '@/lib/lcoh/calculations'
-import { REGIONAL_PRESETS } from '@/lib/lcoh/presets'
 import type { RegionalPreset } from '@/lib/lcoh/presets'
 import { validateElectrolyzerParams, validateSmrParams } from '@/lib/lcoh/validation'
 import type { ValidationError } from '@/lib/lcoh/validation'
 import { useLcohStorage } from '@/hooks/useLcohStorage'
 import { useCurrency } from '@/hooks/useCurrency'
-
-const SMR_PATHWAYS: PathwayId[] = ['smr', 'smr_ccs', 'atr_ccs', 'coal']
-
-export function isSmrPathway(id: PathwayId): boolean {
-  return SMR_PATHWAYS.includes(id)
-}
+import { isSmrPathway } from '@/lib/lcoh/utils'
 
 function useInitialState() {
   const storage = useLcohStorage()

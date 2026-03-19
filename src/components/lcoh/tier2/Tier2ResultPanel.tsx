@@ -59,9 +59,7 @@ interface Props {
 
 export default function Tier2ResultPanel({
   t,
-  lang,
   result,
-  sensitivities,
   isSmr,
   isStale,
   tier1Compatible,
@@ -79,7 +77,7 @@ export default function Tier2ResultPanel({
                 <h2 className="text-sm font-semibold text-gray-700">{t.lcoh.result}</h2>
               </div>
               <div className="mb-4 pb-3 border-b border-gray-100">
-                <CurrencySelector {...currencyCtx} />
+                <CurrencySelector {...currencyCtx} t={t} />
               </div>
 
               {/* Tier 1 vs Tier 2 비교 */}
@@ -159,9 +157,7 @@ export default function Tier2ResultPanel({
           /* 결과 없을 때 플레이스홀더 (데스크톱만 표시) */
           <div className="hidden lg:flex bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 p-8 items-center justify-center min-h-64">
             <p className="text-sm text-gray-400 text-center whitespace-pre-line">
-              {lang === 'ko'
-                ? '파라미터를 입력하고\n계산 버튼을 누르세요'
-                : 'Enter parameters and\nclick Calculate'}
+              {t.common.enterParamsPrompt}
             </p>
           </div>
         )}

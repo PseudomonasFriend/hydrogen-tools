@@ -189,7 +189,7 @@ export default function SmrCapexBreakdown({ pathway, capexPerTpd, onCapexChange,
           className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
         >
           <span>{expanded ? '▲' : '▼'}</span>
-          <span>{lang === 'ko' ? '항목별로 나눠서 입력' : 'Enter cost breakdown'}</span>
+          <span>{t.common.breakdownExpand}</span>
         </button>
       )}
 

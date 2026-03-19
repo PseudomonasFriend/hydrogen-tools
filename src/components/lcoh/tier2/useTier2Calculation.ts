@@ -14,12 +14,7 @@ import { calcElectrolyzerLCOH_T2, calcSmrLCOH_T2, calcSensitivity } from '@/lib/
 import { useLcohStorage } from '@/hooks/useLcohStorage'
 import { useCurrency } from '@/hooks/useCurrency'
 import type { RegionalPreset } from '@/lib/lcoh/presets'
-
-const SMR_PATHWAYS: PathwayId[] = ['smr', 'smr_ccs', 'atr_ccs', 'coal']
-
-export function isSmrPathway(id: PathwayId): boolean {
-  return SMR_PATHWAYS.includes(id)
-}
+import { isSmrPathway } from '@/lib/lcoh/utils'
 
 function useInitialState() {
   const storage = useLcohStorage()
