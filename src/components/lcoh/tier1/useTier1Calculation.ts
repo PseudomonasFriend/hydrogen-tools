@@ -11,6 +11,7 @@ import type { ValidationError } from '@/lib/lcoh/validation'
 import { useLcohStorage } from '@/hooks/useLcohStorage'
 import { useCurrency } from '@/hooks/useCurrency'
 import { isSmrPathway } from '@/lib/lcoh/utils'
+import { trackCalculatorRun, trackPathwayChange } from '@/lib/analytics'
 
 function useInitialState() {
   const storage = useLcohStorage()
@@ -51,6 +52,7 @@ export function useTier1Calculation() {
     setParams(storage.loadParams(newPathway, DEFAULT_PARAMS[newPathway]))
     setResult(null)
     setValidationErrors([])
+    trackPathwayChange(newPathway, 1)
   }
 
   const handleReset = () => {
@@ -90,6 +92,7 @@ export function useTier1Calculation() {
     } else {
       setResult(calcElectrolyzerLCOH(params as ElectrolyzerParams))
     }
+    trackCalculatorRun({ tier: 1, pathway, lang: '' })
     setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
   }
 

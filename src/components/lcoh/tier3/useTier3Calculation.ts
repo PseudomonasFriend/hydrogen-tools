@@ -16,6 +16,7 @@ import { useLcohStorage } from '@/hooks/useLcohStorage'
 import { useCurrency } from '@/hooks/useCurrency'
 import { REGIONAL_PRESETS } from '@/lib/lcoh/presets'
 import { isSmrPathway } from '@/lib/lcoh/utils'
+import { trackCalculatorRun, trackPathwayChange } from '@/lib/analytics'
 
 function useInitialState() {
   const storage = useLcohStorage()
@@ -70,6 +71,7 @@ export function useTier3Calculation() {
     setResult(null)
     setBreakEvenResult(null)
     setIsStale(false)
+    trackPathwayChange(id, 3)
   }
 
   const handleReset = () => {
@@ -91,6 +93,7 @@ export function useTier3Calculation() {
     const be = calcBreakEven(params, t2Params, t3Params)
     setBreakEvenResult(be)
     setIsStale(false)
+    trackCalculatorRun({ tier: 3, pathway, lang: '' })
     setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
   }
 
